@@ -66,21 +66,16 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
     return rutinasDb.map((rutinaDb) => this.mapearADominio(rutinaDb));
   }
 
-  /**
-   * Implementación del método para encontrar una única rutina por su ID.
-   */
   public async encontrarPorId(id: string): Promise<Rutina | null> {
     const rutinaDb = await this.prisma.routine.findUnique({
       where: { id },
       include: {
-        // Incluimos la tabla de unión y, dentro de ella, el ejercicio relacionado
-        // para obtener todos los detalles necesarios en una sola consulta.
         exercises: {
           orderBy: {
-            orderIndex: 'asc', // Aseguramos que los ejercicios vengan en orden
+            orderIndex: 'asc',
           },
           include: {
-            exercise: true, // Hacemos el JOIN a la tabla 'exercises'
+            exercise: true,
           },
         },
       },
@@ -104,8 +99,9 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
     const ejerciciosMapeados = rutinaDb.exercises.map((e) =>
       Ejercicio.desdePersistencia({
         id: e.exercise.id,
-        nombre: e.exercise.name, // Ahora tenemos el nombre real del ejercicio
+        nombre: e.exercise.name,
         setsReps: e.setsReps,
+        descripcion: e.exercise.description, // <-- CORRECCIÓN: Se añade la propiedad 'descripcion'
       }),
     );
 

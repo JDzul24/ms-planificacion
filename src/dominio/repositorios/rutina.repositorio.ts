@@ -24,4 +24,16 @@ export interface IRutinaRepositorio {
    * @returns Una promesa que resuelve a la entidad Rutina si se encuentra, o null en caso contrario.
    */
   encontrarPorId(id: string): Promise<Rutina | null>;
+
+  /**
+   * --- CORRECCIÓN AQUÍ: Se añade la declaración del método faltante ---
+   * Verifica si una rutina existe y si pertenece a un coach específico.
+   * @param rutinaId El ID de la rutina a validar.
+   * @param coachId El ID del coach que debe ser el propietario.
+   * @returns Una promesa que resuelve a `true` si la rutina existe y le pertenece, `false` en caso contrario.
+   */
+  validarExistenciaYPropietario(
+    rutinaId: string,
+    coachId: string,
+  ): Promise<boolean>;
 }

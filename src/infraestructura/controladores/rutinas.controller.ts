@@ -19,7 +19,9 @@ import { CrearRutinaDto } from '../dtos/crear-rutina.dto';
 import { CrearRutinaService } from '../../aplicacion/servicios/crear-rutina.service';
 import { ConsultarRutinasService } from '../../aplicacion/servicios/consultar-rutinas.service';
 import { ConsultarDetallesRutinaService } from '../../aplicacion/servicios/consultar-detalles-rutina.service';
-import { JwtAuthGuard } from '../../../../libs/auth/src/guardias/jwt-auth.guard'; // Asumiendo librería compartida
+// --- CORRECCIÓN CLAVE AQUÍ: Se importa la guardia de la carpeta local ---
+import { JwtAuthGuard } from '../guardias/jwt-auth.guard';
+// --- FIN DE LA CORRECCIÓN ---
 import { IsOptional, IsString } from 'class-validator';
 
 // DTO para la validación del query parameter
@@ -38,7 +40,7 @@ interface RequestConUsuario {
 }
 
 @Controller('rutinas')
-@UseGuards(JwtAuthGuard) // Aplicamos la guardia a todo el controlador
+@UseGuards(JwtAuthGuard)
 export class RutinasController {
   constructor(
     @Inject(CrearRutinaService)
@@ -62,13 +64,11 @@ export class RutinasController {
     @Body() crearRutinaDto: CrearRutinaDto,
     @Req() req: RequestConUsuario,
   ) {
-    // Lógica de autorización a nivel de rol
     if (req.user.rol !== 'Entrenador') {
       throw new ForbiddenException(
         'Solo los entrenadores pueden crear rutinas.',
       );
     }
-    // Pasamos el ID del coach desde el token para asegurar que es el dueño
     const dtoConCoachId = { ...crearRutinaDto, coachId: req.user.userId };
     return this.crearRutinaService.ejecutar(dtoConCoachId);
   }
@@ -80,15 +80,9 @@ export class RutinasController {
     return this.consultarRutinasService.ejecutar(filtros);
   }
 
-  /**
-   * Endpoint para obtener los detalles completos de una rutina específica por su ID.
-   * GET /routines/:id
-   */
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async obtenerDetallesDeRutina(@Param('id', ParseUUIDPipe) id: string) {
-    // La guardia ya ha validado que el usuario está autenticado.
-    // La lógica de negocio se delega completamente al servicio.
     return this.consultarDetallesRutinaService.ejecutar(id);
   }
 }

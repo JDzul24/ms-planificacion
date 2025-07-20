@@ -7,7 +7,7 @@ export class Rutina {
   readonly nivel: string;
   readonly coachId: string;
   readonly sportId: number;
-  public ejercicios: Ejercicio[];
+  public ejercicios: Ejercicio[]; // La lista de ejercicios que componen la rutina
 
   private constructor(props: {
     id: string;
@@ -17,10 +17,10 @@ export class Rutina {
     sportId: number;
     ejercicios: Ejercicio[];
   }) {
+    // Validaciones de dominio
     if (!props.nombre) throw new Error('El nombre de la rutina es requerido.');
-    if (!props.ejercicios || props.ejercicios.length === 0) {
+    if (props.ejercicios.length === 0)
       throw new Error('Una rutina debe tener al menos un ejercicio.');
-    }
 
     this.id = props.id;
     this.nombre = props.nombre;
@@ -35,14 +35,14 @@ export class Rutina {
     nivel: string;
     coachId: string;
     sportId: number;
-    ejercicios: { exerciseId: string; setsReps: string | null }[];
+    ejercicios: { exerciseId: string; setsReps: string }[];
   }): Rutina {
-    // El método 'crear' recibe los datos crudos y los convierte en entidades Ejercicio.
     const ejerciciosEntidad = props.ejercicios.map((e) =>
       Ejercicio.desdePersistencia({
         id: e.exerciseId,
-        nombre: '', // El nombre se obtendrá de la BD, aquí no es necesario
+        nombre: '', // Proporcionamos un nombre vacío o un placeholder si no lo tenemos del DTO
         setsReps: e.setsReps,
+        descripcion: null, // <-- CORRECCIÓN: Se añade la propiedad 'descripcion'
       }),
     );
 
@@ -57,9 +57,7 @@ export class Rutina {
   }
 
   /**
-   * --- MÉTODO AÑADIDO ---
-   * Método estático para reconstituir una entidad Rutina desde los datos
-   * que vienen de la capa de persistencia (base de datos).
+   * Método para reconstituir una entidad desde la base de datos.
    */
   public static desdePersistencia(props: {
     id: string;
@@ -69,7 +67,6 @@ export class Rutina {
     sportId: number;
     ejercicios: Ejercicio[];
   }): Rutina {
-    // Reutilizamos el constructor privado para crear la instancia.
     return new Rutina(props);
   }
 }
