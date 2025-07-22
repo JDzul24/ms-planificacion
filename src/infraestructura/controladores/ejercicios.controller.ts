@@ -10,7 +10,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ConsultarEjerciciosService } from '../../aplicacion/servicios/consultar-ejercicios.service';
-import { JwtAuthGuard } from '../../../../ms-identidad/src/infraestructura/guardias/jwt-auth.guard'; // Importar la guardia JWT
+import { JwtAuthGuard } from '../guardias/jwt-auth.guard';
 
 // DTO para la validación del query parameter
 import { IsInt, IsOptional, Min } from 'class-validator';
