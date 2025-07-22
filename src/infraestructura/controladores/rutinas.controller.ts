@@ -14,27 +14,39 @@ import {
   ValidationPipe,
   ForbiddenException,
   Req,
+  PipeTransform,
+  ArgumentMetadata,
+  BadRequestException,
 } from '@nestjs/common';
 import { CrearRutinaDto } from '../dtos/crear-rutina.dto';
 import { CrearRutinaService } from '../../aplicacion/servicios/crear-rutina.service';
 import { ConsultarRutinasService } from '../../aplicacion/servicios/consultar-rutinas.service';
 import { ConsultarDetallesRutinaService } from '../../aplicacion/servicios/consultar-detalles-rutina.service';
 import { JwtAuthGuard } from '../guardias/jwt-auth.guard';
-import { IsOptional, IsString } from 'class-validator';
+import { isUUID } from 'class-validator';
 
-// DTO para la validación del query parameter
-class FiltroRutinasDto {
-  @IsString()
-  @IsOptional()
-  nivel?: string;
+// --- CORRECCIÓN: Se elimina el decorador @Injectable ---
+export class ParseArrayUUIDPipe implements PipeTransform<string, string[]> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  transform(value: string, metadata: ArgumentMetadata): string[] {
+    // <-- Se usa _metadata
+    if (!value) {
+      return [];
+    }
+    const ids = value.split(',');
+    for (const id of ids) {
+      if (!isUUID(id, '4')) {
+        throw new BadRequestException(
+          `El valor "${id}" no es un UUID v4 válido en la lista de IDs.`,
+        );
+      }
+    }
+    return ids;
+  }
 }
 
-// Interfaz para el objeto Request con el usuario
 interface RequestConUsuario {
-  user: {
-    userId: string;
-    rol: string;
-  };
+  user: { userId: string; rol: string };
 }
 
 @Controller('rutinas')
@@ -73,9 +85,12 @@ export class RutinasController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async obtenerRutinas(@Query() filtros: FiltroRutinasDto) {
-    return this.consultarRutinasService.ejecutar(filtros);
+  // --- CORRECCIÓN: Se eliminó la clase DTO innecesaria y el ValidationPipe ---
+  async obtenerRutinas(
+    @Query('ids', new ParseArrayUUIDPipe()) ids?: string[],
+    @Query('nivel') nivel?: string,
+  ) {
+    return this.consultarRutinasService.ejecutar({ ids, nivel });
   }
 
   @Get(':id')

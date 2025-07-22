@@ -15,7 +15,6 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
   constructor(private readonly prisma: PrismaService) {}
 
   public async guardar(rutina: Rutina): Promise<Rutina> {
-    // La creación de la rutina debe considerar la nueva propiedad 'duracionEstimadaSegundos' en RoutineExercise
     const rutinaGuardadaDb = await this.prisma.routine.create({
       data: {
         id: rutina.id,
@@ -48,10 +47,18 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
     return this.mapearADominio(rutinaGuardadaDb);
   }
 
-  public async encontrar(filtros?: { nivel?: string }): Promise<Rutina[]> {
+  /**
+   * Implementación del método para encontrar rutinas con filtros opcionales por nivel y/o IDs.
+   */
+  public async encontrar(filtros?: {
+    nivel?: string;
+    ids?: string[];
+  }): Promise<Rutina[]> {
     const rutinasDb = await this.prisma.routine.findMany({
       where: {
         targetLevel: filtros?.nivel,
+        // Si se proporciona un arreglo de IDs, se añade la condición 'in' a la consulta.
+        id: filtros?.ids ? { in: filtros.ids } : undefined,
       },
       include: {
         exercises: {
@@ -90,10 +97,6 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
     return this.mapearADominio(rutinaDb);
   }
 
-  /**
-   * --- MÉTODO FALTANTE IMPLEMENTADO ---
-   * Implementación del método para validar la existencia y propiedad de una rutina.
-   */
   public async validarExistenciaYPropietario(
     rutinaId: string,
     coachId: string,
@@ -118,7 +121,6 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
         nombre: e.exercise.name,
         setsReps: e.setsReps,
         descripcion: e.exercise.description,
-        // Aseguramos que el mapeo también incluya la duración
         duracionEstimadaSegundos: e.duracionEstimadaSegundos ?? 0,
       }),
     );

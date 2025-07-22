@@ -12,11 +12,11 @@ export interface IRutinaRepositorio {
   guardar(rutina: Rutina): Promise<Rutina>;
 
   /**
-   * Busca y devuelve una lista de rutinas, opcionalmente filtrada por nivel.
-   * @param filtros Un objeto opcional con los criterios de búsqueda, como el nivel.
+   * Busca y devuelve una lista de rutinas, con filtros opcionales.
+   * @param filtros Un objeto opcional con criterios de búsqueda como nivel o una lista de IDs.
    * @returns Una promesa que resuelve a un arreglo de entidades Rutina.
    */
-  encontrar(filtros?: { nivel?: string }): Promise<Rutina[]>;
+  encontrar(filtros?: { nivel?: string; ids?: string[] }): Promise<Rutina[]>;
 
   /**
    * Busca una única rutina por su identificador.
@@ -26,7 +26,6 @@ export interface IRutinaRepositorio {
   encontrarPorId(id: string): Promise<Rutina | null>;
 
   /**
-   * --- CORRECCIÓN AQUÍ: Se añade la declaración del método faltante ---
    * Verifica si una rutina existe y si pertenece a un coach específico.
    * @param rutinaId El ID de la rutina a validar.
    * @param coachId El ID del coach que debe ser el propietario.
