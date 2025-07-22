@@ -19,9 +19,7 @@ import { CrearRutinaDto } from '../dtos/crear-rutina.dto';
 import { CrearRutinaService } from '../../aplicacion/servicios/crear-rutina.service';
 import { ConsultarRutinasService } from '../../aplicacion/servicios/consultar-rutinas.service';
 import { ConsultarDetallesRutinaService } from '../../aplicacion/servicios/consultar-detalles-rutina.service';
-// --- CORRECCIÓN CLAVE AQUÍ: Se importa la guardia de la carpeta local ---
 import { JwtAuthGuard } from '../guardias/jwt-auth.guard';
-// --- FIN DE LA CORRECCIÓN ---
 import { IsOptional, IsString } from 'class-validator';
 
 // DTO para la validación del query parameter

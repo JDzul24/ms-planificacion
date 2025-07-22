@@ -7,7 +7,7 @@ export class Rutina {
   readonly nivel: string;
   readonly coachId: string;
   readonly sportId: number;
-  public ejercicios: Ejercicio[]; // La lista de ejercicios que componen la rutina
+  public ejercicios: Ejercicio[];
 
   private constructor(props: {
     id: string;
@@ -17,7 +17,6 @@ export class Rutina {
     sportId: number;
     ejercicios: Ejercicio[];
   }) {
-    // Validaciones de dominio
     if (!props.nombre) throw new Error('El nombre de la rutina es requerido.');
     if (props.ejercicios.length === 0)
       throw new Error('Una rutina debe tener al menos un ejercicio.');
@@ -35,14 +34,20 @@ export class Rutina {
     nivel: string;
     coachId: string;
     sportId: number;
-    ejercicios: { exerciseId: string; setsReps: string }[];
+    ejercicios: {
+      exerciseId: string;
+      setsReps: string;
+      duracionEstimadaSegundos?: number;
+    }[];
   }): Rutina {
+    // --- CORRECCIÓN AQUÍ: El mapeo ahora es completo y correcto ---
     const ejerciciosEntidad = props.ejercicios.map((e) =>
       Ejercicio.desdePersistencia({
         id: e.exerciseId,
-        nombre: '', // Proporcionamos un nombre vacío o un placeholder si no lo tenemos del DTO
+        nombre: '', // El nombre se obtendrá de la BD, aquí no es necesario
         setsReps: e.setsReps,
-        descripcion: null, // <-- CORRECCIÓN: Se añade la propiedad 'descripcion'
+        descripcion: null,
+        duracionEstimadaSegundos: e.duracionEstimadaSegundos ?? 0,
       }),
     );
 
@@ -56,9 +61,6 @@ export class Rutina {
     });
   }
 
-  /**
-   * Método para reconstituir una entidad desde la base de datos.
-   */
   public static desdePersistencia(props: {
     id: string;
     nombre: string;
@@ -68,5 +70,16 @@ export class Rutina {
     ejercicios: Ejercicio[];
   }): Rutina {
     return new Rutina(props);
+  }
+
+  /**
+   * Calcula la duración total estimada de la rutina.
+   * El código ahora es seguro a nivel de tipos.
+   */
+  public calcularDuracionEstimadaSegundos(): number {
+    return this.ejercicios.reduce(
+      (total, ejercicio) => total + ejercicio.duracionEstimadaSegundos,
+      0,
+    );
   }
 }

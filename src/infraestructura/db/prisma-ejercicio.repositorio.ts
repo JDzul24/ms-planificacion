@@ -39,7 +39,8 @@ export class PrismaEjercicioRepositorio implements IEjercicioRepositorio {
       id: ejercicioDb.id,
       nombre: ejercicioDb.name,
       descripcion: ejercicioDb.description,
-      setsReps: null, // `setsReps` es específico de `RoutineExercise`, no del ejercicio base
+      setsReps: null,
+      duracionEstimadaSegundos: 0,
     });
   }
 }

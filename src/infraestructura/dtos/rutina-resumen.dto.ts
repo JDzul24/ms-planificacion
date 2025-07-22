@@ -6,4 +6,5 @@ export class RutinaResumenDto {
   nombre: string;
   nivel: string;
   cantidadEjercicios: number;
+  duracionEstimadaMinutos: number;
 }

@@ -15,6 +15,7 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
   constructor(private readonly prisma: PrismaService) {}
 
   public async guardar(rutina: Rutina): Promise<Rutina> {
+    // La creación de la rutina debe considerar la nueva propiedad 'duracionEstimadaSegundos' en RoutineExercise
     const rutinaGuardadaDb = await this.prisma.routine.create({
       data: {
         id: rutina.id,
@@ -26,6 +27,7 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
           create: rutina.ejercicios.map((ejercicio, index) => ({
             orderIndex: index + 1,
             setsReps: ejercicio.setsReps,
+            duracionEstimadaSegundos: ejercicio.duracionEstimadaSegundos,
             exercise: {
               connect: {
                 id: ejercicio.id,
@@ -89,8 +91,22 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
   }
 
   /**
-   * Mapea un objeto de rutina de la base de datos a una entidad de dominio.
+   * --- MÉTODO FALTANTE IMPLEMENTADO ---
+   * Implementación del método para validar la existencia y propiedad de una rutina.
    */
+  public async validarExistenciaYPropietario(
+    rutinaId: string,
+    coachId: string,
+  ): Promise<boolean> {
+    const count = await this.prisma.routine.count({
+      where: {
+        id: rutinaId,
+        coachId: coachId,
+      },
+    });
+    return count > 0;
+  }
+
   private mapearADominio(
     rutinaDb: Routine & {
       exercises: (RoutineExercise & { exercise: PrismaExercise })[];
@@ -101,7 +117,9 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
         id: e.exercise.id,
         nombre: e.exercise.name,
         setsReps: e.setsReps,
-        descripcion: e.exercise.description, // <-- CORRECCIÓN: Se añade la propiedad 'descripcion'
+        descripcion: e.exercise.description,
+        // Aseguramos que el mapeo también incluya la duración
+        duracionEstimadaSegundos: e.duracionEstimadaSegundos ?? 0,
       }),
     );
 

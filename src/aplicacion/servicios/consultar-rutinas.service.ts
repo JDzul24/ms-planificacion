@@ -17,15 +17,20 @@ export class ConsultarRutinasService {
   async ejecutar(filtros?: { nivel?: string }): Promise<RutinaResumenDto[]> {
     const rutinas = await this.rutinaRepositorio.encontrar(filtros);
 
-    // Mapeamos las entidades de dominio completas a un DTO de resumen.
-    // Esto evita enviar información innecesaria (como la lista detallada de ejercicios)
-    // en una vista de listado.
-    return rutinas.map((rutina) => ({
-      id: rutina.id,
-      nombre: rutina.nombre,
-      nivel: rutina.nivel,
-      cantidadEjercicios: rutina.ejercicios.length,
-      // Aquí se podría añadir más información de resumen, como una duración estimada.
-    }));
+    // Mapeamos las entidades de dominio completas a un DTO de resumen enriquecido.
+    return rutinas.map((rutina) => {
+      // Invocamos el método de lógica de negocio de la entidad de dominio.
+      const duracionSegundos = rutina.calcularDuracionEstimadaSegundos();
+      // Realizamos la conversión a minutos para el DTO.
+      const duracionMinutos = Math.ceil(duracionSegundos / 60);
+
+      return {
+        id: rutina.id,
+        nombre: rutina.nombre,
+        nivel: rutina.nivel,
+        cantidadEjercicios: rutina.ejercicios.length,
+        duracionEstimadaMinutos: duracionMinutos,
+      };
+    });
   }
 }
