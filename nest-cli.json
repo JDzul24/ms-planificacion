@@ -3,8 +3,18 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true,
-    "webpack": false,
-    "tsConfigPath": "tsconfig.build.json"
+    "deleteOutDir": true
+  },
+
+  "projects": {
+    "ms-planificacion": {
+      "type": "application",
+      "root": "apps/ms-planificacion",
+      "entryFile": "main",
+      "sourceRoot": "apps/ms-planificacion/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/ms-planificacion/tsconfig.app.json"
+      }
+    }
   }
 }
