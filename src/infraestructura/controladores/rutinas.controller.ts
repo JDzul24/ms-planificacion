@@ -49,7 +49,7 @@ interface RequestConUsuario {
   user: { userId: string; rol: string };
 }
 
-@Controller('rutinas')
+@Controller('routines') // Cambiado a inglés para consistencia
 @UseGuards(JwtAuthGuard)
 export class RutinasController {
   constructor(

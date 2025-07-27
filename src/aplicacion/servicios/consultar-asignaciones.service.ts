@@ -25,6 +25,7 @@ export class ConsultarAsignacionesService {
           ? 'Rutina'
           : 'Meta';
         // Ahora estamos seguros de que idPlan no será undefined
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const idPlan = (asignacion.rutinaId || asignacion.metaId)!;
 
         if (asignacion.rutinaId) {
