@@ -44,6 +44,11 @@ export class ConsultarDetallesRutinaService {
 
         console.log(`📊 [ConsultarDetallesRutinaService] Ejercicio #${index + 1}: ${ejercicio.nombre}`);
         console.log(`  - Categoría almacenada: ${categoria || 'no encontrada'}`);
+        console.log(`  - Ejercicio DB información: ${JSON.stringify(ejercicioDb?.exercise || {})}`);
+        
+        if (categoria === 'resistencia') {
+          console.log(`  🔍 [ConsultarDetallesRutinaService] DETECTADA categoría 'resistencia'`);
+        }
         
         // Solo como fallback usar la determinación por nombre
         if (!categoria || !['calentamiento', 'resistencia', 'tecnica'].includes(categoria)) {
@@ -52,6 +57,7 @@ export class ConsultarDetallesRutinaService {
           categoria = categoriaCalculada;
         } else {
           console.log(`  - Usando categoría almacenada: ${categoria}`);
+          console.log(`  - ¿Es válida? ${['calentamiento', 'resistencia', 'tecnica'].includes(categoria) ? 'SÍ' : 'NO'}`);
         }
 
         return {

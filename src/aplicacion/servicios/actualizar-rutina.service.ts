@@ -79,9 +79,22 @@ export class ActualizarRutinaService {
       ejercicios: rutinaActualizada.ejercicios.map((ejercicio) => {
         // Buscar la categoría real en los datos obtenidos
         const ejercicioDb = ejerciciosConCategoria.find(e => e.id === ejercicio.id);
-        const categoria = ejercicioDb?.categoria || 'tecnica';
         
-        console.log(`📋 [ActualizarRutinaService] Ejercicio ${ejercicio.nombre} - Categoría: ${categoria}`);
+        // Verificar si la categoría es válida
+        const categoriaOriginal = ejercicioDb?.categoria;
+        console.log(`🔎 [ActualizarRutinaService] Ejercicio ${ejercicio.nombre} - Categoría original: ${categoriaOriginal}`);
+        
+        // Solo asignar default si la categoría no existe o no es válida
+        let categoria;
+        if (!categoriaOriginal || !['calentamiento', 'resistencia', 'tecnica'].includes(categoriaOriginal)) {
+          console.warn(`⚠️ [ActualizarRutinaService] Categoría inválida o vacía para ${ejercicio.nombre}, usando default`);
+          categoria = 'tecnica';
+        } else {
+          categoria = categoriaOriginal;
+          console.log(`✅ [ActualizarRutinaService] Usando categoría válida: ${categoria}`);
+        }
+        
+        console.log(`📋 [ActualizarRutinaService] Ejercicio ${ejercicio.nombre} - Categoría final: ${categoria}`);
         
         return {
           id: ejercicio.id,

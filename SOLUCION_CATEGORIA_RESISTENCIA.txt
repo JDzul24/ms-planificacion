@@ -1,0 +1,64 @@
+# 🚀 SOLUCIÓN: Corrección de Categoría "resistencia"
+
+## 📋 Resumen de la Corrección
+
+Hemos identificado y corregido el problema específico con la categoría "resistencia" que se estaba guardando incorrectamente como "tecnica". Los cambios realizados garantizan que todas las categorías ("calentamiento", "resistencia" y "tecnica") se procesan y almacenan correctamente.
+
+## 🔍 Problema Identificado
+
+1. **Causa Principal**: El problema estaba en los servicios de actualización y consulta de rutinas, donde el valor por defecto siempre era "tecnica" cuando había algún problema con la categoría, sin verificar si la categoría original era válida.
+
+2. **Archivos Corregidos**:
+   - `actualizar-rutina.service.ts`
+   - `consultar-detalles-rutina.service.ts`
+   - `prisma-ejercicio.repositorio.ts`
+
+## 📝 Cambios Específicos
+
+### 1. En `actualizar-rutina.service.ts`:
+
+- Se mejoró la validación de categorías para preservar correctamente "resistencia"
+- Se agregaron logs detallados de diagnóstico
+- Se cambió el código para respetar la categoría original del ejercicio
+
+### 2. En `consultar-detalles-rutina.service.ts`:
+
+- Se agregaron logs de diagnóstico más detallados
+- Se implementó una verificación específica para la categoría "resistencia"
+- Se mejoró la validación de categorías
+
+### 3. En `prisma-ejercicio.repositorio.ts`:
+
+- Se agregó validación adicional para la categoría "resistencia"
+- Se implementaron logs de diagnóstico específicos
+- Se añadió verificación posterior al guardado
+
+## ✅ Verificación
+
+Para verificar que la corrección funciona correctamente, puedes:
+
+1. **Crear una rutina nueva** con ejercicios de categorías:
+   - calentamiento
+   - resistencia
+   - tecnica
+
+2. **Verificar en la interfaz** que:
+   - Los ejercicios de calentamiento aparecen en la sección de calentamiento
+   - Los ejercicios de resistencia aparecen en la sección de resistencia (antes aparecían en técnica)
+   - Los ejercicios de técnica aparecen en la sección de técnica
+
+## 🐛 Si Persiste el Problema
+
+Si aún experimentas problemas con la categoría "resistencia", verifica:
+
+1. La consola del backend para los logs de diagnóstico
+2. Que estés utilizando la versión más reciente del backend
+3. Que no haya problemas de caché en el frontend
+
+## 📞 Feedback
+
+Por favor, proporciona feedback sobre esta corrección para garantizar que todas las categorías funcionan correctamente en tu entorno.
+
+---
+
+Esta corrección debería resolver completamente el problema reportado. Si necesitas ayuda adicional o tienes preguntas, no dudes en contactarnos.

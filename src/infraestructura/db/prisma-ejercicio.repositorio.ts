@@ -59,11 +59,20 @@ export class PrismaEjercicioRepositorio implements IEjercicioRepositorio {
       console.log('📥 [PrismaEjercicioRepositorio] Categoría recibida:', categoria);
       
       // Validar la categoría para diagnóstico
+      console.log('🔍 [PrismaEjercicioRepositorio] Validando categoría:', categoria);
+      console.log('🔍 [PrismaEjercicioRepositorio] ¿Es resistencia?', categoria === 'resistencia');
+      console.log('🔍 [PrismaEjercicioRepositorio] Tipo de dato:', typeof categoria);
+      
       if (!categoria || !['calentamiento', 'resistencia', 'tecnica'].includes(categoria)) {
         console.warn('⚠️ [PrismaEjercicioRepositorio] Categoría inválida, usando default:', categoria);
         categoria = 'resistencia';
       } else {
         console.log('✅ [PrismaEjercicioRepositorio] Categoría validada:', categoria);
+      }
+      
+      // Verificación adicional después de la validación
+      if (categoria === 'resistencia') {
+        console.log('🎯 [PrismaEjercicioRepositorio] Categoría RESISTENCIA confirmada');
       }
 
       // Intentar upsert con categoria (para bases de datos actualizadas)
@@ -85,6 +94,14 @@ export class PrismaEjercicioRepositorio implements IEjercicioRepositorio {
       });
       
       console.log('✅ [PrismaEjercicioRepositorio] Ejercicio guardado con categoría:', ejercicioDb.categoria);
+      
+      // Verificación final después de guardar
+      if (categoria === 'resistencia' && ejercicioDb.categoria !== 'resistencia') {
+        console.error('❌❌ [PrismaEjercicioRepositorio] ERROR: La categoría resistencia no se guardó correctamente!');
+        console.error('❌❌ [PrismaEjercicioRepositorio] Esperado: resistencia, Actual:', ejercicioDb.categoria);
+      } else if (categoria === 'resistencia') {
+        console.log('✅✅ [PrismaEjercicioRepositorio] Categoría resistencia guardada correctamente!');
+      }
 
       return this.mapearADominio(ejercicioDb);
     } catch (error) {
