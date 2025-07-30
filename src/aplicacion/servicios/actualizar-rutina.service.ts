@@ -61,6 +61,7 @@ export class ActualizarRutinaService {
         descripcion: ejercicio.descripcion,
         setsReps: ejercicio.setsReps,
         duracionEstimadaSegundos: ejercicio.duracionEstimadaSegundos,
+        categoria: 'tecnica' as const, // Valor por defecto - debería ser configurado según el tipo de ejercicio
       })),
     };
   }

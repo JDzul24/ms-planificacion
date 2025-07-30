@@ -42,10 +42,10 @@ export class ConsultarAsignacionesService {
         try {
           const identityServiceUrl = this.configService.get<string>('IDENTITY_SERVICE_URL') || 'http://localhost:3000';
           const response = await firstValueFrom(
-            this.httpService.get(`${identityServiceUrl}/usuarios/${asignacion.assignerId}`)
+            this.httpService.get<string>(`${identityServiceUrl}/usuarios/${asignacion.assignerId}`)
           );
-          if (response.data && response.data.nombre) {
-            nombreEntrenador = response.data.nombre;
+          if (response.data && (response.data as any).nombre) {
+            nombreEntrenador = (response.data as any).nombre;
           }
         } catch (error) {
           console.log('Error obteniendo datos del entrenador:', error.message);
