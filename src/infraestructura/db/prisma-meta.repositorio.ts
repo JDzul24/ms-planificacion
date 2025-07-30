@@ -24,7 +24,7 @@ export class PrismaMetaRepositorio implements IMetaRepositorio {
 
   public async encontrarPorCreador(creadorId: string): Promise<Meta[]> {
     const metasDb = await this.prisma.goal.findMany({
-      where: { creatorId },
+      where: { creatorId: creadorId },
       orderBy: { dueDate: 'asc' },
     });
 
@@ -88,7 +88,7 @@ export class PrismaMetaRepositorio implements IMetaRepositorio {
       creadorId: metaDb.creatorId,
       descripcion: metaDb.description,
       fechaLimite: metaDb.dueDate,
-      createdAt: metaDb.createdAt || new Date(), // Fallback si no existe
+      createdAt: new Date(), // El modelo Goal no tiene createdAt, usar fecha actual
     });
   }
 }

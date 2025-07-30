@@ -22,6 +22,11 @@ export class RutinaDetallesDto {
   nivel: string;
 
   /**
+   * La descripción opcional de la rutina.
+   */
+  descripcion?: string | null;
+
+  /**
    * Un arreglo que contiene los detalles de cada ejercicio dentro de la rutina.
    */
   ejercicios: EjercicioDetalleDto[];
