@@ -49,20 +49,49 @@ export class ActualizarRutinaService {
       },
     );
 
-    // Mapear a DTO de respuesta
+    console.log('✅ [ActualizarRutinaService] Rutina actualizada correctamente:', rutinaActualizada.id);
+    
+    // Obtener categorías desde la base de datos para cada ejercicio
+    console.log('🔍 [ActualizarRutinaService] Recuperando categorías de ejercicios desde BD...');
+    
+    // Acceder directamente a los datos del ejercicio en Prisma (a través de casting)
+    const ejercicioIds = rutinaActualizada.ejercicios.map(e => e.id);
+    const ejerciciosConCategoria = await (this.rutinaRepositorio as any).prisma.exercise.findMany({
+      where: {
+        id: { in: ejercicioIds }
+      },
+      select: {
+        id: true,
+        name: true,
+        categoria: true
+      }
+    });
+
+    console.log('📊 [ActualizarRutinaService] Categorías recuperadas de BD:', 
+                ejerciciosConCategoria.map(e => `${e.name}: ${e.categoria || 'sin categoría'}`).join(', '));
+    
+    // Mapear a DTO de respuesta usando las categorías reales
     return {
       id: rutinaActualizada.id,
       nombre: rutinaActualizada.nombre,
       nivel: rutinaActualizada.nivel,
-      descripcion: null, // TODO: Agregar descripción a la entidad
-      ejercicios: rutinaActualizada.ejercicios.map((ejercicio) => ({
-        id: ejercicio.id,
-        nombre: ejercicio.nombre,
-        descripcion: ejercicio.descripcion,
-        setsReps: ejercicio.setsReps,
-        duracionEstimadaSegundos: ejercicio.duracionEstimadaSegundos,
-        categoria: 'tecnica' as const, // Valor por defecto - debería ser configurado según el tipo de ejercicio
-      })),
+      descripcion: rutinaActualizada.descripcion || null,
+      ejercicios: rutinaActualizada.ejercicios.map((ejercicio) => {
+        // Buscar la categoría real en los datos obtenidos
+        const ejercicioDb = ejerciciosConCategoria.find(e => e.id === ejercicio.id);
+        const categoria = ejercicioDb?.categoria || 'tecnica';
+        
+        console.log(`📋 [ActualizarRutinaService] Ejercicio ${ejercicio.nombre} - Categoría: ${categoria}`);
+        
+        return {
+          id: ejercicio.id,
+          nombre: ejercicio.nombre,
+          descripcion: ejercicio.descripcion,
+          setsReps: ejercicio.setsReps,
+          duracionEstimadaSegundos: ejercicio.duracionEstimadaSegundos,
+          categoria: categoria as 'calentamiento' | 'resistencia' | 'tecnica',
+        };
+      }),
     };
   }
 }

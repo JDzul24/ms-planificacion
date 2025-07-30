@@ -55,6 +55,17 @@ export class PrismaEjercicioRepositorio implements IEjercicioRepositorio {
    */
   public async guardar(ejercicio: Ejercicio, categoria = 'resistencia', sportId = 1): Promise<Ejercicio> {
     try {
+      console.log('📥 [PrismaEjercicioRepositorio] Guardando ejercicio:', ejercicio.nombre);
+      console.log('📥 [PrismaEjercicioRepositorio] Categoría recibida:', categoria);
+      
+      // Validar la categoría para diagnóstico
+      if (!categoria || !['calentamiento', 'resistencia', 'tecnica'].includes(categoria)) {
+        console.warn('⚠️ [PrismaEjercicioRepositorio] Categoría inválida, usando default:', categoria);
+        categoria = 'resistencia';
+      } else {
+        console.log('✅ [PrismaEjercicioRepositorio] Categoría validada:', categoria);
+      }
+
       // Intentar upsert con categoria (para bases de datos actualizadas)
       const ejercicioDb = await this.prisma.exercise.upsert({
         where: { id: ejercicio.id },
@@ -72,12 +83,16 @@ export class PrismaEjercicioRepositorio implements IEjercicioRepositorio {
           sportId: sportId,
         },
       });
+      
+      console.log('✅ [PrismaEjercicioRepositorio] Ejercicio guardado con categoría:', ejercicioDb.categoria);
 
       return this.mapearADominio(ejercicioDb);
     } catch (error) {
       // Si falla por columna categoria inexistente, intentar sin categoria
       if (error.code === 'P2022' && error.meta?.column === 'categoria') {
-        console.warn('Columna categoria no existe en BD, creando ejercicio sin categoria');
+        console.warn('⚠️ [PrismaEjercicioRepositorio] Columna categoria no existe en BD, creando ejercicio sin categoria');
+        console.error('❌ [PrismaEjercicioRepositorio] Error original:', error.message);
+        
         const ejercicioDb = await this.prisma.exercise.upsert({
           where: { id: ejercicio.id },
           create: {
@@ -93,6 +108,7 @@ export class PrismaEjercicioRepositorio implements IEjercicioRepositorio {
           },
         });
 
+        console.log('✅ [PrismaEjercicioRepositorio] Ejercicio guardado sin campo categoria:', ejercicioDb.name);
         return this.mapearADominio(ejercicioDb);
       }
       
