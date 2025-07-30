@@ -104,7 +104,16 @@ export class RutinasController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async obtenerDetallesDeRutina(@Param('id', ParseUUIDPipe) id: string) {
+  async obtenerDetallesDeRutina(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Req() req: RequestConUsuario,
+  ) {
+    // Permitir acceso tanto a entrenadores como a atletas
+    if (req.user.rol !== 'Entrenador' && req.user.rol !== 'Atleta') {
+      throw new ForbiddenException(
+        'Solo los entrenadores y atletas pueden ver detalles de rutinas.',
+      );
+    }
     return this.consultarDetallesRutinaService.ejecutar(id);
   }
 

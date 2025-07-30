@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { HttpModule } from '@nestjs/axios';
 
 // --- Controladores ---
 import { RutinasController } from './infraestructura/controladores/rutinas.controller';
@@ -46,6 +47,7 @@ import { PrismaMetaRepositorio } from './infraestructura/db/prisma-meta.reposito
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PassportModule,
+    HttpModule, // Agregar HttpModule para hacer requests a otros servicios
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

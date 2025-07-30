@@ -30,7 +30,10 @@ export class ConsultarDetallesRutinaService {
       (ejercicio) => ({
         id: ejercicio.id,
         nombre: ejercicio.nombre,
+        descripcion: ejercicio.descripcion || '',
         setsReps: ejercicio.setsReps,
+        duracionEstimadaSegundos: ejercicio.duracionEstimadaSegundos,
+        categoria: this.determinarCategoria(ejercicio.nombre),
       }),
     );
 
@@ -38,9 +41,59 @@ export class ConsultarDetallesRutinaService {
       id: rutina.id,
       nombre: rutina.nombre,
       nivel: rutina.nivel,
+      descripcion: `Rutina de ${rutina.nivel} para boxeo`, // Descripción temporal
       ejercicios: ejerciciosDto,
     };
 
     return rutinaDetallesDto;
+  }
+
+  /**
+   * Determina la categoría de un ejercicio basándose en su nombre.
+   * Esta es una implementación temporal hasta que se agregue el campo categoria a la entidad.
+   */
+  private determinarCategoria(nombreEjercicio: string): 'calentamiento' | 'resistencia' | 'tecnica' {
+    const nombre = nombreEjercicio.toLowerCase();
+
+    // Palabras clave para calentamiento
+    const calentamientoKeywords = [
+      'calentamiento', 'estiramiento', 'movilidad', 'articular', 
+      'rotacion', 'rotación', 'flexibilidad', 'preparacion', 'preparación',
+      'hombro', 'cuello', 'muñeca', 'tobillo', 'cadera'
+    ];
+
+    // Palabras clave para resistencia
+    const resistenciaKeywords = [
+      'burpees', 'salto', 'correr', 'trote', 'cardio', 'resistencia',
+      'mountain', 'climber', 'jumping', 'jack', 'sentadilla', 'squat',
+      'plancha', 'plank', 'abdomen', 'flexion', 'flexión', 'lagartija',
+      'push', 'up', 'escalador', 'sprint'
+    ];
+
+    // Palabras clave para técnica
+    const tecnicaKeywords = [
+      'jab', 'cross', 'hook', 'uppercut', 'directo', 'gancho',
+      'sombra', 'shadow', 'boxing', 'boxeo', 'golpe', 'combo',
+      'combinacion', 'combinación', 'tecnica', 'técnica', 'defensa',
+      'esquiva', 'bloqueo', 'guardia', 'stance', 'postura'
+    ];
+
+    // Verificar calentamiento
+    if (calentamientoKeywords.some(keyword => nombre.includes(keyword))) {
+      return 'calentamiento';
+    }
+
+    // Verificar técnica
+    if (tecnicaKeywords.some(keyword => nombre.includes(keyword))) {
+      return 'tecnica';
+    }
+
+    // Verificar resistencia
+    if (resistenciaKeywords.some(keyword => nombre.includes(keyword))) {
+      return 'resistencia';
+    }
+
+    // Por defecto, asignar a técnica si no se puede determinar
+    return 'tecnica';
   }
 }

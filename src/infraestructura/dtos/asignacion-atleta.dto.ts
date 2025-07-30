@@ -6,35 +6,35 @@ export class AsignacionAtletaDto {
   /**
    * El ID único de la asignación.
    */
-  idAsignacion: string;
+  id: string;
 
   /**
-   * El tipo de plan asignado ('Rutina' o 'Meta').
+   * El nombre de la rutina asignada.
    */
-  tipoPlan: 'Rutina' | 'Meta';
+  nombreRutina: string;
 
   /**
-   * El ID del plan asignado (ya sea de la rutina o de la meta).
+   * El nombre del entrenador que asignó la rutina.
    */
-  idPlan: string;
+  nombreEntrenador: string;
 
   /**
-   * El nombre o descripción del plan asignado.
+   * El estado actual de la asignación.
    */
-  nombrePlan: string; // <-- NUEVA PROPIEDAD ENRIQUECIDA
-
-  /**
-   * El ID del entrenador que realizó la asignación.
-   */
-  idAsignador: string;
-
-  /**
-   * El estado actual de la asignación (ej. 'PENDIENTE').
-   */
-  estado: string;
+  estado: 'PENDIENTE' | 'EN_PROGRESO' | 'COMPLETADA';
 
   /**
    * La fecha en que se realizó la asignación.
    */
   fechaAsignacion: Date;
+
+  /**
+   * El ID de la rutina asignada.
+   */
+  rutinaId: string;
+
+  /**
+   * El ID del entrenador que realizó la asignación.
+   */
+  assignerId: string;
 }
