@@ -15,37 +15,127 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
   constructor(private readonly prisma: PrismaService) {}
 
   public async guardar(rutina: Rutina): Promise<Rutina> {
-    const rutinaGuardadaDb = await this.prisma.routine.create({
-      data: {
-        id: rutina.id,
-        name: rutina.nombre,
-        targetLevel: rutina.nivel,
-        coachId: rutina.coachId,
-        sportId: rutina.sportId,
-        description: rutina.descripcion,
-        exercises: {
-          create: rutina.ejercicios.map((ejercicio, index) => ({
-            orderIndex: index + 1,
-            setsReps: ejercicio.setsReps,
-            duracionEstimadaSegundos: ejercicio.duracionEstimadaSegundos,
-            exercise: {
-              connect: {
-                id: ejercicio.id,
+    try {
+      console.log('🚀 [PrismaRutinaRepositorio] Iniciando guardado de rutina:', rutina.nombre);
+      console.log('📊 [PrismaRutinaRepositorio] Ejercicios a conectar:', rutina.ejercicios.length);
+
+      // Verificar que todos los ejercicios existan antes de crear la rutina
+      for (const ejercicio of rutina.ejercicios) {
+        console.log(`🔍 [PrismaRutinaRepositorio] Verificando ejercicio: ${ejercicio.id}`);
+        const ejercicioExiste = await this.prisma.exercise.findUnique({
+          where: { id: ejercicio.id }
+        });
+        
+        if (!ejercicioExiste) {
+          throw new Error(`Ejercicio con ID ${ejercicio.id} no existe en la base de datos`);
+        }
+        console.log(`✅ [PrismaRutinaRepositorio] Ejercicio encontrado: ${ejercicioExiste.name}`);
+      }
+
+      console.log('💾 [PrismaRutinaRepositorio] Creando rutina en base de datos');
+
+      let rutinaGuardadaDb;
+
+      try {
+        // INTENTO 1: Crear con clave UUID (nuevo esquema)
+        console.log('💾 [PrismaRutinaRepositorio] Intentando crear con esquema nuevo (UUID)');
+        rutinaGuardadaDb = await this.prisma.routine.create({
+          data: {
+            id: rutina.id,
+            name: rutina.nombre,
+            targetLevel: rutina.nivel,
+            coachId: rutina.coachId,
+            sportId: rutina.sportId,
+            description: rutina.descripcion,
+            exercises: {
+              create: rutina.ejercicios.map((ejercicio, index) => {
+                console.log(`🔗 [PrismaRutinaRepositorio] Conectando ejercicio ${index + 1}: ${ejercicio.id}`);
+                return {
+                  orderIndex: index + 1,
+                  setsReps: ejercicio.setsReps,
+                  duracionEstimadaSegundos: ejercicio.duracionEstimadaSegundos,
+                  exercise: {
+                    connect: {
+                      id: ejercicio.id,
+                    },
+                  },
+                };
+              }),
+            },
+          },
+          include: {
+            exercises: {
+              include: {
+                exercise: true,
               },
             },
-          })),
-        },
-      },
-      include: {
-        exercises: {
-          include: {
-            exercise: true,
           },
-        },
-      },
-    });
+        });
+      } catch (createError) {
+        console.warn('⚠️ [PrismaRutinaRepositorio] Error con esquema nuevo, intentando método alternativo');
+        console.warn('📊 [PrismaRutinaRepositorio] Error detalle:', createError.message);
 
-    return this.mapearADominio(rutinaGuardadaDb);
+        // INTENTO 2: Crear rutina y ejercicios por separado (compatible con esquema viejo)
+        console.log('💾 [PrismaRutinaRepositorio] Creando rutina sin ejercicios primero');
+        
+        rutinaGuardadaDb = await this.prisma.routine.create({
+          data: {
+            id: rutina.id,
+            name: rutina.nombre,
+            targetLevel: rutina.nivel,
+            coachId: rutina.coachId,
+            sportId: rutina.sportId,
+            description: rutina.descripcion,
+          },
+        });
+
+        console.log('💾 [PrismaRutinaRepositorio] Agregando ejercicios uno por uno');
+
+        // Crear ejercicios de rutina uno por uno
+        for (let index = 0; index < rutina.ejercicios.length; index++) {
+          const ejercicio = rutina.ejercicios[index];
+          console.log(`🔗 [PrismaRutinaRepositorio] Agregando ejercicio ${index + 1}: ${ejercicio.id}`);
+          
+          await this.prisma.routineExercise.create({
+            data: {
+              routineId: rutina.id,
+              exerciseId: ejercicio.id,
+              orderIndex: index + 1,
+              setsReps: ejercicio.setsReps,
+              duracionEstimadaSegundos: ejercicio.duracionEstimadaSegundos,
+            },
+          });
+        }
+
+        // Obtener la rutina completa con sus ejercicios
+        rutinaGuardadaDb = await this.prisma.routine.findUnique({
+          where: { id: rutina.id },
+          include: {
+            exercises: {
+              include: {
+                exercise: true,
+              },
+            },
+          },
+        });
+      }
+
+      console.log('✅ [PrismaRutinaRepositorio] Rutina guardada exitosamente:', rutinaGuardadaDb.id);
+
+      return this.mapearADominio(rutinaGuardadaDb);
+    } catch (error) {
+      console.error('❌ [PrismaRutinaRepositorio] Error guardando rutina:', error);
+      console.error('📊 [PrismaRutinaRepositorio] Stack trace:', error.stack);
+      
+      // Re-lanzar con información más específica
+      if (error.code === 'P2002') {
+        throw new Error(`Error de duplicado en base de datos: ${error.message}`);
+      } else if (error.code === 'P2025') {
+        throw new Error(`Registro no encontrado: ${error.message}`);
+      } else {
+        throw new Error(`Error de base de datos guardando rutina: ${error.message}`);
+      }
+    }
   }
 
   /**

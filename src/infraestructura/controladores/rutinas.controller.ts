@@ -83,13 +83,30 @@ export class RutinasController {
     @Body() crearRutinaDto: CrearRutinaDto,
     @Req() req: RequestConUsuario,
   ) {
-    if (req.user.rol !== 'Entrenador') {
-      throw new ForbiddenException(
-        'Solo los entrenadores pueden crear rutinas.',
-      );
+    try {
+      console.log('🚀 [RutinasController] Recibida petición crear rutina:', crearRutinaDto.nombre);
+      console.log('👤 [RutinasController] Usuario:', req.user.userId, 'Rol:', req.user.rol);
+
+      if (req.user.rol !== 'Entrenador') {
+        throw new ForbiddenException(
+          'Solo los entrenadores pueden crear rutinas.',
+        );
+      }
+
+      const dtoConCoachId = { ...crearRutinaDto, coachId: req.user.userId };
+      console.log('📋 [RutinasController] DTO completo:', JSON.stringify(dtoConCoachId, null, 2));
+
+      const resultado = await this.crearRutinaService.ejecutar(dtoConCoachId);
+      
+      console.log('✅ [RutinasController] Rutina creada exitosamente:', resultado.id);
+      return resultado;
+    } catch (error) {
+      console.error('❌ [RutinasController] Error en crear rutina:', error);
+      console.error('📊 [RutinasController] Stack trace:', error.stack);
+      
+      // Re-lanzar el error para que NestJS lo maneje apropiadamente
+      throw error;
     }
-    const dtoConCoachId = { ...crearRutinaDto, coachId: req.user.userId };
-    return this.crearRutinaService.ejecutar(dtoConCoachId);
   }
 
   @Get()
