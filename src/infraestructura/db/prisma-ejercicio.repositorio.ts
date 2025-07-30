@@ -54,24 +54,50 @@ export class PrismaEjercicioRepositorio implements IEjercicioRepositorio {
    * @returns Una promesa que resuelve a la entidad Ejercicio guardada.
    */
   public async guardar(ejercicio: Ejercicio, categoria = 'resistencia', sportId = 1): Promise<Ejercicio> {
-    const ejercicioDb = await this.prisma.exercise.upsert({
-      where: { id: ejercicio.id },
-      create: {
-        id: ejercicio.id,
-        name: ejercicio.nombre,
-        description: ejercicio.descripcion,
-        categoria: categoria,
-        sportId: sportId,
-      },
-      update: {
-        name: ejercicio.nombre,
-        description: ejercicio.descripcion,
-        categoria: categoria,
-        sportId: sportId,
-      },
-    });
+    try {
+      // Intentar upsert con categoria (para bases de datos actualizadas)
+      const ejercicioDb = await this.prisma.exercise.upsert({
+        where: { id: ejercicio.id },
+        create: {
+          id: ejercicio.id,
+          name: ejercicio.nombre,
+          description: ejercicio.descripcion,
+          categoria: categoria,
+          sportId: sportId,
+        },
+        update: {
+          name: ejercicio.nombre,
+          description: ejercicio.descripcion,
+          categoria: categoria,
+          sportId: sportId,
+        },
+      });
 
-    return this.mapearADominio(ejercicioDb);
+      return this.mapearADominio(ejercicioDb);
+    } catch (error) {
+      // Si falla por columna categoria inexistente, intentar sin categoria
+      if (error.code === 'P2022' && error.meta?.column === 'categoria') {
+        console.warn('Columna categoria no existe en BD, creando ejercicio sin categoria');
+        const ejercicioDb = await this.prisma.exercise.upsert({
+          where: { id: ejercicio.id },
+          create: {
+            id: ejercicio.id,
+            name: ejercicio.nombre,
+            description: ejercicio.descripcion,
+            sportId: sportId,
+          },
+          update: {
+            name: ejercicio.nombre,
+            description: ejercicio.descripcion,
+            sportId: sportId,
+          },
+        });
+
+        return this.mapearADominio(ejercicioDb);
+      }
+      // Re-lanzar cualquier otro error
+      throw error;
+    }
   }
 
   /**
