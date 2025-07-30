@@ -21,30 +21,23 @@ export class CrearRutinaService {
       throw new Error('sportId debe ser un número válido');
     }
 
-    // Procesar ejercicios: crear los que no existen en la base de datos
+    // Procesar ejercicios: asegurar que existan en la base de datos
     const ejerciciosTransformados = [];
     
     for (const ejercicioDto of dto.ejercicios) {
-      // Verificar si el ejercicio ya existe
-      let ejercicioExistente = await this.ejercicioRepositorio.encontrarPorId(ejercicioDto.id);
+      // Crear o actualizar el ejercicio usando el ID del frontend
+      const ejercicioParaGuardar = Ejercicio.desdePersistencia({
+        id: ejercicioDto.id,
+        nombre: ejercicioDto.nombre,
+        setsReps: '', // Este campo no se usa en la tabla Exercise
+        descripcion: ejercicioDto.descripcion || null,
+        duracionEstimadaSegundos: 0, // Este campo no se usa en la tabla Exercise
+      });
       
-      // Si no existe, crear el ejercicio dinámicamente
-      if (!ejercicioExistente) {
-        const nuevoEjercicio = Ejercicio.crear({
-          nombre: ejercicioDto.nombre,
-          setsReps: ejercicioDto.setsReps,
-          descripcion: ejercicioDto.descripcion || null,
-          duracionEstimadaSegundos: ejercicioDto.duracionEstimadaSegundos,
-        });
-        
-        // Actualizar el ID para usar el ID del frontend
-        (nuevoEjercicio as any).id = ejercicioDto.id;
-        
-        // Guardar el ejercicio con la categoría del frontend
-        await this.ejercicioRepositorio.guardar(nuevoEjercicio, ejercicioDto.categoria, sportIdNumber);
-      }
+      // Guardar el ejercicio (upsert)
+      await this.ejercicioRepositorio.guardar(ejercicioParaGuardar, ejercicioDto.categoria, sportIdNumber);
 
-      // Agregar a la lista de ejercicios transformados
+      // Agregar a la lista de ejercicios transformados para la rutina
       ejerciciosTransformados.push({
         exerciseId: ejercicioDto.id,
         setsReps: ejercicioDto.setsReps,

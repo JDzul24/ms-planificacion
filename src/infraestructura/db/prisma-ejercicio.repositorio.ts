@@ -47,16 +47,23 @@ export class PrismaEjercicioRepositorio implements IEjercicioRepositorio {
   }
 
   /**
-   * Guarda un ejercicio en la base de datos.
+   * Guarda un ejercicio en la base de datos usando upsert (crear o actualizar).
    * @param ejercicio La entidad Ejercicio a guardar.
    * @param categoria La categoría del ejercicio.
    * @param sportId El ID del deporte al que pertenece.
    * @returns Una promesa que resuelve a la entidad Ejercicio guardada.
    */
   public async guardar(ejercicio: Ejercicio, categoria = 'resistencia', sportId = 1): Promise<Ejercicio> {
-    const ejercicioDb = await this.prisma.exercise.create({
-      data: {
+    const ejercicioDb = await this.prisma.exercise.upsert({
+      where: { id: ejercicio.id },
+      create: {
         id: ejercicio.id,
+        name: ejercicio.nombre,
+        description: ejercicio.descripcion,
+        categoria: categoria,
+        sportId: sportId,
+      },
+      update: {
         name: ejercicio.nombre,
         description: ejercicio.descripcion,
         categoria: categoria,

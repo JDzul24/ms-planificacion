@@ -138,6 +138,7 @@ model Exercise {
 }
 
 model RoutineExercise {
+  id          String  @id @default(uuid()) @db.Char(36)
   routineId   String  @db.Char(36)
   exerciseId  String  @db.Char(36)
   orderIndex  Int     @map("order_index")
@@ -147,7 +148,6 @@ model RoutineExercise {
   routine  Routine  @relation(fields: [routineId], references: [id])
   exercise Exercise @relation(fields: [exerciseId], references: [id])
 
-  @@id([routineId, exerciseId, orderIndex])
   @@map("routine_exercises")
 }
 
