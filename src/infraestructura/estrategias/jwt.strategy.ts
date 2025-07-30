@@ -8,6 +8,8 @@ interface JwtPayload {
   sub: string;
   email: string;
   rol: string;
+  iss?: string;
+  aud?: string;
 }
 
 // Define la estructura del objeto 'user' que se adjuntará al request
@@ -32,6 +34,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       ignoreExpiration: false,
       // Usar el mismo secreto que ms-identidad para compatibilidad
       secretOrKey: jwtSecret,
+      // CRÍTICO: Validar issuer y audience para compatibilidad con ms-identidad
+      issuer: configService.get<string>('JWT_ISSUER_URL'),
+      audience: configService.get<string>('JWT_AUDIENCE'),
     });
   }
 

@@ -1,0 +1,124 @@
+🚨 SOLUCIÓN ERROR 401 UNAUTHORIZED - MS-PLANIFICACION
+=====================================================
+
+## 📋 PROBLEMA IDENTIFICADO
+
+El ms-planificacion rechaza tokens válidos de ms-identidad con error 401 porque:
+
+1. ❌ **Falta validación de ISSUER**: El token incluye `iss: "https://web-87pckv3zfk3q.up-de-fra1-k8s-1.apps.run-on-seenode.com "` pero ms-planificacion no lo valida
+2. ❌ **Falta validación de AUDIENCE**: El token incluye `aud: "capbox-app"` pero ms-planificacion no lo valida
+3. ❌ **Variables de entorno faltantes**: JWT_ISSUER_URL y JWT_AUDIENCE no están configuradas en Seenode
+
+## ✅ CORRECCIONES IMPLEMENTADAS EN EL CÓDIGO
+
+### 1. Actualizada JWT Strategy (src/infraestructura/estrategias/jwt.strategy.ts)
+
+```typescript
+// ANTES (solo validaba secreto):
+super({
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  ignoreExpiration: false,
+  secretOrKey: jwtSecret,
+});
+
+// DESPUÉS (valida secreto + issuer + audience):
+super({
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  ignoreExpiration: false,
+  secretOrKey: jwtSecret,
+  // CRÍTICO: Validar issuer y audience para compatibilidad con ms-identidad
+  issuer: configService.get<string>('JWT_ISSUER_URL'),
+  audience: configService.get<string>('JWT_AUDIENCE'),
+});
+```
+
+### 2. Actualizada interfaz JwtPayload
+
+```typescript
+// ANTES:
+interface JwtPayload {
+  sub: string;
+  email: string;
+  rol: string;
+}
+
+// DESPUÉS:
+interface JwtPayload {
+  sub: string;
+  email: string;
+  rol: string;
+  iss?: string;
+  aud?: string;
+}
+```
+
+## 🔧 CONFIGURACIÓN REQUERIDA EN SEENODE
+
+### Variables de entorno que DEBES AGREGAR en Seenode:
+
+**JWT_ISSUER_URL**
+```
+https://web-87pckv3zfk3q.up-de-fra1-k8s-1.apps.run-on-seenode.com 
+```
+⚠️ **IMPORTANTE**: Incluir el espacio al final exactamente como está en el token
+
+**JWT_AUDIENCE**
+```
+capbox-app
+```
+
+## 📊 VALIDACIÓN DEL TOKEN
+
+### Token decodificado que debe funcionar:
+```json
+{
+  "sub": "14274100d-d358-4a86-8645-70a5419aa3f4",
+  "email": "amizaday.dev@gmail.com", 
+  "rol": "Entrenador",
+  "iss": "https://web-87pckv3zfk3q.up-de-fra1-k8s-1.apps.run-on-seenode.com ",
+  "aud": "capbox-app",
+  "iat": 1753869887,
+  "exp": 1753873487
+}
+```
+
+### Validaciones que ahora funcionarán:
+- ✅ **Secreto JWT**: UN_SECRETO_DE_PRODUCCION_LARGO_Y_COMPLEJO
+- ✅ **Issuer**: https://web-87pckv3zfk3q.up-de-fra1-k8s-1.apps.run-on-seenode.com 
+- ✅ **Audience**: capbox-app
+- ✅ **Expiración**: Validada automáticamente
+- ✅ **Rol**: "Entrenador" tiene permisos para /routines
+
+## 🚀 PASOS PARA RESOLVER
+
+1. **Agregar variables en Seenode**:
+   - JWT_ISSUER_URL = `https://web-87pckv3zfk3q.up-de-fra1-k8s-1.apps.run-on-seenode.com `
+   - JWT_AUDIENCE = `capbox-app`
+
+2. **Deploy del código actualizado** (ya hecho)
+
+3. **Reiniciar ms-planificacion** en Seenode
+
+4. **Probar endpoints**:
+   ```bash
+   GET /planning/v1/routines?nivel=Intermedio
+   GET /planning/v1/exercises?sportId=1
+   POST /planning/v1/assignments
+   ```
+
+## 🎯 RESULTADO ESPERADO
+
+Después de la configuración, estos endpoints deberían funcionar:
+- ✅ `GET /planning/v1/routines` - Lista rutinas
+- ✅ `GET /planning/v1/exercises` - Lista ejercicios  
+- ✅ `POST /planning/v1/assignments` - Crear asignaciones
+- ✅ `GET /planning/v1/assignments/me` - Ver asignaciones del atleta
+
+## 🔍 DEBUGGING
+
+Si persiste el error, verificar en logs de ms-planificacion:
+1. ¿Se cargan las variables JWT_ISSUER_URL y JWT_AUDIENCE?
+2. ¿Passport-JWT muestra errores específicos de validación?
+3. ¿El rol "Entrenador" tiene permisos en los controladores?
+
+**Estado**: ✅ Código corregido, esperando configuración de variables en Seenode

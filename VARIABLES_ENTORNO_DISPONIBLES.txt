@@ -1,0 +1,31 @@
+📋 VARIABLES DE ENTORNO DISPONIBLES EN MS-PLANIFICACION (SEENODE)
+================================================================
+
+Basado en las capturas enviadas:
+
+✅ CONFIGURADAS:
+1. DATABASE_URL
+   Valor: postgresql://db_0t34gvw6qv2w:Y9U8tAeJOPZ9fgfATi6dYX9q@up-de-fra1-postgresql-1.db.run-on-seenode.com:11550/db_0t34gvw6qv2w?schema=public
+
+2. JWT_SECRET  
+   Valor: UN_SECRETO_DE_PRODUCCION_LARGO_Y_COMPLEJO
+
+3. JWT_ACCESS_TOKEN_EXPIRATION
+   Valor: 1h
+
+❌ FALTANTES (CRÍTICAS PARA JWT):
+4. JWT_ISSUER_URL
+   Valor requerido: https://web-87pckv3zfk3q.up-de-fra1-k8s-1.apps.run-on-seenode.com 
+   (debe coincidir exactamente con ms-identidad)
+
+5. JWT_AUDIENCE
+   Valor requerido: capbox-app
+   (debe coincidir exactamente con ms-identidad)
+
+🚨 PROBLEMA IDENTIFICADO:
+El error 401 Unauthorized se debe a que ms-planificacion no puede validar 
+los campos 'iss' y 'aud' del token porque estas variables no están configuradas.
+
+SOLUCIÓN:
+Agregar JWT_ISSUER_URL y JWT_AUDIENCE en Seenode con los valores exactos 
+que usa ms-identidad.
