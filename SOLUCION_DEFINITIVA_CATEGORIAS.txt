@@ -1,0 +1,57 @@
+# 🔧 SOLUCIÓN DEFINITIVA: Problema de Categorías en Ejercicios
+
+## 🔍 Diagnóstico del Problema
+
+El problema ocurrió por dos razones principales:
+
+1. **Inconsistencia de Tipos**: Añadimos el campo `categoria` como obligatorio en la interfaz `EjercicioEnRutina` pero no actualizamos todos los lugares donde se creaban objetos de este tipo.
+
+2. **Error en el Despliegue**: El compilador de TypeScript detectó correctamente que estábamos creando objetos incompletos sin la propiedad `categoria` obligatoria.
+
+## ✅ Cambios Realizados
+
+### 1. En `rutina.entity.ts`:
+
+- Modificamos el método `crear()` para recibir y procesar la categoría de cada ejercicio
+- Actualizamos la creación de objetos `EjercicioEnRutina` para incluir el campo `categoria`
+- Establecimos un valor por defecto (`tecnica`) para cuando no se proporcione una categoría
+
+### 2. En `crear-rutina.service.ts`:
+
+- Actualizamos el código que transforma los ejercicios para incluir la categoría
+
+### 3. En `actualizar-rutina.service.ts` y `prisma-rutina.repositorio.ts`:
+
+- Añadimos el campo `categoria` en el DTO de actualización
+- Actualizamos el repositorio para manejar la categoría durante las actualizaciones
+- Implementamos lógica para actualizar la categoría en la tabla `exercise` cuando se actualiza una rutina
+
+### 4. En `actualizar-rutina.dto.ts`:
+
+- Añadimos el campo `categoria` con validación adecuada para asegurar que solo se acepten valores permitidos
+
+## 🧪 Verificación
+
+1. **Compilación Exitosa**: El código ahora compila correctamente sin errores de tipo
+2. **Prueba de Creación**: Cuando crees una rutina con ejercicios de distintas categorías:
+   - Los ejercicios se guardan con la categoría correcta
+   - Al consultar la rutina, los ejercicios mantienen su categoría original
+
+## 📝 Notas para el Equipo de Frontend
+
+- No se requieren cambios en el frontend
+- La API sigue recibiendo y devolviendo exactamente el mismo formato JSON
+- La diferencia es que ahora la categoría `resistencia` se guarda y devuelve correctamente
+
+## 🔄 Pasos para Verificar
+
+1. **Crear una rutina** con ejercicios de categorías `calentamiento`, `resistencia` y `tecnica`
+2. **Consultar la rutina** y verificar que cada ejercicio tiene la categoría correcta
+3. **Modificar la rutina** y verificar que las categorías se preservan
+
+## 👉 En caso de más problemas
+
+Si el problema persiste después de esta actualización:
+1. Revisa los logs del backend para cualquier mensaje de error específico
+2. Verifica que estés usando la versión más reciente del backend
+3. Contacta al equipo de backend con los logs de errores específicos
