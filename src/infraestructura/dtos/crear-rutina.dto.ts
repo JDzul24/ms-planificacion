@@ -22,6 +22,10 @@ class EjercicioEnRutinaDto {
   @IsOptional()
   descripcion?: string;
 
+  @Transform(({ value }) => {
+    // Limpiar caracteres especiales del final y espacios extra
+    return typeof value === 'string' ? value.replace(/[|]+$/, '').trim() : value;
+  })
   @IsString()
   @IsNotEmpty()
   setsReps: string;
