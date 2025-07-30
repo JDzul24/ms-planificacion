@@ -58,6 +58,7 @@ export class CrearRutinaService {
       nivel: dto.nivel,
       coachId: dto.coachId,
       sportId: sportIdNumber,
+      descripcion: dto.descripcion,
       ejercicios: ejerciciosTransformados,
     });
 

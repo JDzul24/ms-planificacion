@@ -22,6 +22,7 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
         targetLevel: rutina.nivel,
         coachId: rutina.coachId,
         sportId: rutina.sportId,
+        description: rutina.descripcion,
         exercises: {
           create: rutina.ejercicios.map((ejercicio, index) => ({
             orderIndex: index + 1,
@@ -213,6 +214,7 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
       nivel: rutinaDb.targetLevel,
       coachId: rutinaDb.coachId,
       sportId: rutinaDb.sportId,
+      descripcion: rutinaDb.description,
       ejercicios: ejerciciosMapeados,
     });
   }

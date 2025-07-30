@@ -7,6 +7,7 @@ export class Rutina {
   readonly nivel: string;
   readonly coachId: string;
   readonly sportId: number;
+  readonly descripcion?: string;
   public ejercicios: Ejercicio[];
 
   private constructor(props: {
@@ -15,6 +16,7 @@ export class Rutina {
     nivel: string;
     coachId: string;
     sportId: number;
+    descripcion?: string;
     ejercicios: Ejercicio[];
   }) {
     if (!props.nombre) throw new Error('El nombre de la rutina es requerido.');
@@ -26,6 +28,7 @@ export class Rutina {
     this.nivel = props.nivel;
     this.coachId = props.coachId;
     this.sportId = props.sportId;
+    this.descripcion = props.descripcion;
     this.ejercicios = props.ejercicios;
   }
 
@@ -34,6 +37,7 @@ export class Rutina {
     nivel: string;
     coachId: string;
     sportId: number;
+    descripcion?: string;
     ejercicios: {
       exerciseId: string;
       setsReps: string;
@@ -57,6 +61,7 @@ export class Rutina {
       nivel: props.nivel,
       coachId: props.coachId,
       sportId: props.sportId,
+      descripcion: props.descripcion,
       ejercicios: ejerciciosEntidad,
     });
   }
@@ -67,6 +72,7 @@ export class Rutina {
     nivel: string;
     coachId: string;
     sportId: number;
+    descripcion?: string;
     ejercicios: Ejercicio[];
   }): Rutina {
     return new Rutina(props);
