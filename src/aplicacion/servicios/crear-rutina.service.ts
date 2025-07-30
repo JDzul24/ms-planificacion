@@ -61,6 +61,7 @@ export class CrearRutinaService {
             exerciseId: ejercicioDto.id,
             setsReps: ejercicioDto.setsReps,
             duracionEstimadaSegundos: ejercicioDto.duracionEstimadaSegundos,
+            categoria: ejercicioDto.categoria, // Incluimos la categoría
           });
         } catch (error) {
           console.error(`❌ [CrearRutinaService] Error procesando ejercicio ${ejercicioDto.nombre}:`, error);

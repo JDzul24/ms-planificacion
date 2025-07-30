@@ -259,6 +259,7 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
       exerciseId: string;
       setsReps: string;
       duracionEstimadaSegundos?: number;
+      categoria?: 'calentamiento' | 'resistencia' | 'tecnica';
     }[];
   }): Promise<Rutina> {
     const rutinaActualizada = await this.prisma.$transaction(async (tx) => {
@@ -281,13 +282,24 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
 
         // Crear nuevos ejercicios
         await tx.routineExercise.createMany({
-          data: datosActualizacion.ejercicios.map((ejercicio, index) => ({
-            routineId: id,
-            exerciseId: ejercicio.exerciseId,
-            orderIndex: index + 1,
-            setsReps: ejercicio.setsReps,
-            duracionEstimadaSegundos: ejercicio.duracionEstimadaSegundos,
-          })),
+          data: datosActualizacion.ejercicios.map((ejercicio, index) => {
+            // También debemos actualizar la categoría del ejercicio si se proporcionó
+            if (ejercicio.categoria) {
+              // Actualizar categoría en la tabla exercise
+              tx.exercise.update({
+                where: { id: ejercicio.exerciseId },
+                data: { categoria: ejercicio.categoria },
+              }).catch(err => console.warn('No se pudo actualizar la categoría:', err.message));
+            }
+
+            return {
+              routineId: id,
+              exerciseId: ejercicio.exerciseId,
+              orderIndex: index + 1,
+              setsReps: ejercicio.setsReps,
+              duracionEstimadaSegundos: ejercicio.duracionEstimadaSegundos,
+            };
+          }),
         });
       }
 

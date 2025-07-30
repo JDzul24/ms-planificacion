@@ -51,6 +51,7 @@ export class Rutina {
       exerciseId: string;
       setsReps: string;
       duracionEstimadaSegundos?: number;
+      categoria?: 'calentamiento' | 'resistencia' | 'tecnica'; // Campo añadido
     }[];
   }): Rutina {
     // No necesitamos crear entidades Ejercicio aquí, solo almacenar los datos
@@ -59,6 +60,7 @@ export class Rutina {
       id: e.exerciseId,
       setsReps: e.setsReps,
       duracionEstimadaSegundos: e.duracionEstimadaSegundos ?? 0,
+      categoria: e.categoria || 'tecnica', // Valor por defecto si no se proporciona
     }));
 
     return new Rutina({

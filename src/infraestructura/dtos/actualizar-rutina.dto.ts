@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsArray, ValidateNested, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsArray, ValidateNested, IsUUID, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class EjercicioEnRutinaDto {
@@ -10,6 +10,11 @@ class EjercicioEnRutinaDto {
 
   @IsOptional()
   duracionEstimadaSegundos?: number;
+  
+  @IsOptional()
+  @IsString()
+  @IsIn(['calentamiento', 'resistencia', 'tecnica'])
+  categoria?: 'calentamiento' | 'resistencia' | 'tecnica';
 }
 
 export class ActualizarRutinaDto {
