@@ -129,6 +129,7 @@ model Exercise {
   sportId     Int
   name        String
   description String?           @db.Text
+  categoria   String?           // Agregado: calentamiento, resistencia, tecnica
   
   sport       Sport             @relation(fields: [sportId], references: [id])
   routines    RoutineExercise[]

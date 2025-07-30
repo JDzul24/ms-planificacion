@@ -30,6 +30,44 @@ export class PrismaEjercicioRepositorio implements IEjercicioRepositorio {
   }
 
   /**
+   * Busca un ejercicio por su ID.
+   * @param id El ID del ejercicio a buscar.
+   * @returns Una promesa que resuelve a una entidad Ejercicio o null si no existe.
+   */
+  public async encontrarPorId(id: string): Promise<Ejercicio | null> {
+    const ejercicioDb = await this.prisma.exercise.findUnique({
+      where: { id },
+    });
+
+    if (!ejercicioDb) {
+      return null;
+    }
+
+    return this.mapearADominio(ejercicioDb);
+  }
+
+  /**
+   * Guarda un ejercicio en la base de datos.
+   * @param ejercicio La entidad Ejercicio a guardar.
+   * @param categoria La categoría del ejercicio.
+   * @param sportId El ID del deporte al que pertenece.
+   * @returns Una promesa que resuelve a la entidad Ejercicio guardada.
+   */
+  public async guardar(ejercicio: Ejercicio, categoria = 'resistencia', sportId = 1): Promise<Ejercicio> {
+    const ejercicioDb = await this.prisma.exercise.create({
+      data: {
+        id: ejercicio.id,
+        name: ejercicio.nombre,
+        description: ejercicio.descripcion,
+        categoria: categoria,
+        sportId: sportId,
+      },
+    });
+
+    return this.mapearADominio(ejercicioDb);
+  }
+
+  /**
    * Mapea un objeto de ejercicio de la base de datos (Prisma) a una entidad de dominio `Ejercicio`.
    * @param ejercicioDb El objeto `PrismaExercise` recuperado de la base de datos.
    * @returns Una instancia de la entidad de dominio `Ejercicio`.
