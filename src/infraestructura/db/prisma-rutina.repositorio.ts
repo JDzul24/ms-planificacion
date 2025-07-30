@@ -138,31 +138,63 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
   }
 
   /**
-   * Implementación del método para encontrar rutinas con filtros opcionales por nivel y/o IDs.
+   * Implementación del método para encontrar rutinas con filtros opcionales por nivel, IDs y/o coachId.
    */
   public async encontrar(filtros?: {
     nivel?: string;
     ids?: string[];
+    coachId?: string;
   }): Promise<Rutina[]> {
-    const rutinasDb = await this.prisma.routine.findMany({
-      where: {
-        targetLevel: filtros?.nivel,
-        // Si se proporciona un arreglo de IDs, se añade la condición 'in' a la consulta.
-        id: filtros?.ids ? { in: filtros.ids } : undefined,
-      },
-      include: {
-        exercises: {
-          include: {
-            exercise: true,
+    try {
+      console.log('🔍 [PrismaRutinaRepositorio] Consulta con filtros:', JSON.stringify(filtros, null, 2));
+      
+      // Construir objeto where dinámicamente
+      const whereClause: any = {};
+      
+      if (filtros?.nivel) {
+        whereClause.targetLevel = filtros.nivel;
+        console.log('🎯 [PrismaRutinaRepositorio] Filtro por nivel:', filtros.nivel);
+      }
+      
+      if (filtros?.ids && filtros.ids.length > 0) {
+        whereClause.id = { in: filtros.ids };
+        console.log('🎯 [PrismaRutinaRepositorio] Filtro por IDs:', filtros.ids);
+      }
+      
+      if (filtros?.coachId) {
+        whereClause.coachId = filtros.coachId;
+        console.log('🎯 [PrismaRutinaRepositorio] Filtro por coachId:', filtros.coachId);
+      }
+
+      console.log('📊 [PrismaRutinaRepositorio] WHERE clause final:', JSON.stringify(whereClause, null, 2));
+
+      const rutinasDb = await this.prisma.routine.findMany({
+        where: whereClause,
+        include: {
+          exercises: {
+            include: {
+              exercise: true,
+            },
           },
         },
-      },
-      orderBy: {
-        name: 'asc',
-      },
-    });
+        orderBy: {
+          name: 'asc',
+        },
+      });
 
-    return rutinasDb.map((rutinaDb) => this.mapearADominio(rutinaDb));
+      console.log('📊 [PrismaRutinaRepositorio] Rutinas encontradas en BD:', rutinasDb.length);
+      rutinasDb.forEach((rutina, index) => {
+        console.log(`   ${index + 1}. ${rutina.name} (ID: ${rutina.id}, CoachID: ${rutina.coachId}, SportID: ${rutina.sportId})`);
+      });
+
+      const rutinasMapeadas = rutinasDb.map((rutinaDb) => this.mapearADominio(rutinaDb));
+      console.log('✅ [PrismaRutinaRepositorio] Rutinas mapeadas a dominio:', rutinasMapeadas.length);
+      
+      return rutinasMapeadas;
+    } catch (error) {
+      console.error('❌ [PrismaRutinaRepositorio] Error consultando rutinas:', error);
+      throw error;
+    }
   }
 
   public async encontrarPorId(id: string): Promise<Rutina | null> {

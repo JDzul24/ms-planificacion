@@ -113,10 +113,104 @@ export class RutinasController {
   @HttpCode(HttpStatus.OK)
   // --- CORRECCIÓN: Se eliminó la clase DTO innecesaria y el ValidationPipe ---
   async obtenerRutinas(
+    @Req() req: RequestConUsuario,
     @Query('ids', new ParseArrayUUIDPipe()) ids?: string[],
     @Query('nivel') nivel?: string,
   ) {
-    return this.consultarRutinasService.ejecutar({ ids, nivel });
+    try {
+      console.log('🔍 [GET /routines] Usuario logueado:', req.user.userId, 'Rol:', req.user.rol);
+      console.log('🔍 [GET /routines] Filtros recibidos - ids:', ids, 'nivel:', nivel);
+      
+      // Solo los entrenadores pueden ver rutinas (sus propias rutinas)
+      if (req.user.rol !== 'Entrenador') {
+        throw new ForbiddenException(
+          'Solo los entrenadores pueden consultar rutinas.',
+        );
+      }
+
+      const resultado = await this.consultarRutinasService.ejecutar({ 
+        ids, 
+        nivel, 
+        coachId: req.user.userId  // ← AGREGAR FILTRO POR COACH
+      });
+      
+      console.log('✅ [GET /routines] Rutinas encontradas:', resultado.length);
+      console.log('📊 [GET /routines] Datos:', JSON.stringify(resultado, null, 2));
+      
+      return resultado;
+    } catch (error) {
+      console.error('❌ [GET /routines] Error:', error);
+      throw error;
+    }
+  }
+
+  // TEMPORAL: Endpoint para diagnosticar la BD
+  @Get('debug/all')
+  @HttpCode(HttpStatus.OK)
+  async diagnosticarBD(@Req() req: RequestConUsuario) {
+    try {
+      console.log('🔍 [DEBUG] Iniciando diagnóstico de BD');
+      
+      // Solo entrenadores pueden hacer debug
+      if (req.user.rol !== 'Entrenador') {
+        throw new ForbiddenException('Solo entrenadores pueden hacer debug');
+      }
+
+      // Usar Prisma directamente para verificar datos
+      const prisma = (this.consultarRutinasService as any).rutinaRepositorio.prisma;
+      
+      // 1. Contar todas las rutinas
+      const totalRutinas = await prisma.routine.count();
+      console.log('📊 [DEBUG] Total rutinas en BD:', totalRutinas);
+      
+      // 2. Obtener todas las rutinas (limitadas a 10)
+      const todasRutinas = await prisma.routine.findMany({
+        take: 10,
+        select: {
+          id: true,
+          name: true,
+          targetLevel: true,
+          coachId: true,
+          sportId: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+      
+      console.log('📊 [DEBUG] Rutinas encontradas:', todasRutinas);
+      
+      // 3. Rutinas del coach actual
+      const rutinasDelCoach = await prisma.routine.findMany({
+        where: { coachId: req.user.userId },
+        select: {
+          id: true,
+          name: true,
+          targetLevel: true,
+          coachId: true,
+          sportId: true,
+          createdAt: true,
+        }
+      });
+      
+      console.log('📊 [DEBUG] Rutinas del coach actual:', rutinasDelCoach);
+      
+      return {
+        debug: true,
+        usuario: {
+          id: req.user.userId,
+          rol: req.user.rol
+        },
+        estadisticas: {
+          totalRutinas,
+          rutinasDelCoach: rutinasDelCoach.length
+        },
+        todasRutinas: todasRutinas,
+        rutinasDelCoach: rutinasDelCoach
+      };
+    } catch (error) {
+      console.error('❌ [DEBUG] Error:', error);
+      throw error;
+    }
   }
 
   @Get(':id')

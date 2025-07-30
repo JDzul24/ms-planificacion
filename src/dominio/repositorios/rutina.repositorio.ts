@@ -16,7 +16,7 @@ export interface IRutinaRepositorio {
    * @param filtros Un objeto opcional con criterios de búsqueda como nivel o una lista de IDs.
    * @returns Una promesa que resuelve a un arreglo de entidades Rutina.
    */
-  encontrar(filtros?: { nivel?: string; ids?: string[] }): Promise<Rutina[]>;
+  encontrar(filtros?: { nivel?: string; ids?: string[]; coachId?: string }): Promise<Rutina[]>;
 
   /**
    * Busca una única rutina por su identificador.
