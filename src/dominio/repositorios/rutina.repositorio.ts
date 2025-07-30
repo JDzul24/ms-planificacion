@@ -35,4 +35,28 @@ export interface IRutinaRepositorio {
     rutinaId: string,
     coachId: string,
   ): Promise<boolean>;
+
+  /**
+   * Elimina una rutina y todas sus relaciones asociadas de la base de datos.
+   * @param id El UUID de la rutina a eliminar.
+   * @returns Una promesa que resuelve cuando la eliminación se completa exitosamente.
+   */
+  eliminar(id: string): Promise<void>;
+
+  /**
+   * Actualiza una rutina existente en la base de datos.
+   * @param id El UUID de la rutina a actualizar.
+   * @param datosActualizacion Los datos parciales para actualizar la rutina.
+   * @returns Una promesa que resuelve a la entidad Rutina actualizada.
+   */
+  actualizar(id: string, datosActualizacion: {
+    nombre?: string;
+    nivel?: string;
+    descripcion?: string;
+    ejercicios?: {
+      exerciseId: string;
+      setsReps: string;
+      duracionEstimadaSegundos?: number;
+    }[];
+  }): Promise<Rutina>;
 }

@@ -41,6 +41,49 @@ export class PrismaAsignacionRepositorio implements IAsignacionRepositorio {
     );
   }
 
+  public async encontrarPorId(id: string): Promise<Asignacion | null> {
+    const asignacionDb = await this.prisma.athleteAssignment.findUnique({
+      where: { id },
+    });
+
+    if (!asignacionDb) {
+      return null;
+    }
+
+    return this.mapearADominio(asignacionDb);
+  }
+
+  public async eliminar(id: string): Promise<void> {
+    await this.prisma.athleteAssignment.delete({
+      where: { id },
+    });
+  }
+
+  public async actualizarEstado(
+    id: string,
+    nuevoEstado: 'PENDIENTE' | 'EN_PROGRESO' | 'COMPLETADA',
+  ): Promise<Asignacion> {
+    const asignacionActualizada = await this.prisma.athleteAssignment.update({
+      where: { id },
+      data: { status: nuevoEstado },
+    });
+
+    return this.mapearADominio(asignacionActualizada);
+  }
+
+  public async validarPropietario(
+    asignacionId: string,
+    entrenadorId: string,
+  ): Promise<boolean> {
+    const count = await this.prisma.athleteAssignment.count({
+      where: {
+        id: asignacionId,
+        assignerId: entrenadorId,
+      },
+    });
+    return count > 0;
+  }
+
   private mapearADominio(persistencia: PrismaAsignacion): Asignacion {
     return Asignacion.desdePersistencia({
       id: persistencia.id,

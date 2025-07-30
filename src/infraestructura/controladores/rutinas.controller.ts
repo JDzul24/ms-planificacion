@@ -8,6 +8,8 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
+  Delete,
   Query,
   UseGuards,
   UsePipes,
@@ -19,9 +21,12 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { CrearRutinaDto } from '../dtos/crear-rutina.dto';
+import { ActualizarRutinaDto } from '../dtos/actualizar-rutina.dto';
 import { CrearRutinaService } from '../../aplicacion/servicios/crear-rutina.service';
 import { ConsultarRutinasService } from '../../aplicacion/servicios/consultar-rutinas.service';
 import { ConsultarDetallesRutinaService } from '../../aplicacion/servicios/consultar-detalles-rutina.service';
+import { ActualizarRutinaService } from '../../aplicacion/servicios/actualizar-rutina.service';
+import { EliminarRutinaService } from '../../aplicacion/servicios/eliminar-rutina.service';
 import { JwtAuthGuard } from '../guardias/jwt-auth.guard';
 import { isUUID } from 'class-validator';
 
@@ -59,6 +64,10 @@ export class RutinasController {
     private readonly consultarRutinasService: ConsultarRutinasService,
     @Inject(ConsultarDetallesRutinaService)
     private readonly consultarDetallesRutinaService: ConsultarDetallesRutinaService,
+    @Inject(ActualizarRutinaService)
+    private readonly actualizarRutinaService: ActualizarRutinaService,
+    @Inject(EliminarRutinaService)
+    private readonly eliminarRutinaService: EliminarRutinaService,
   ) {}
 
   @Post()
@@ -97,5 +106,45 @@ export class RutinasController {
   @HttpCode(HttpStatus.OK)
   async obtenerDetallesDeRutina(@Param('id', ParseUUIDPipe) id: string) {
     return this.consultarDetallesRutinaService.ejecutar(id);
+  }
+
+  @Put(':id')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  )
+  async actualizarRutina(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() actualizarRutinaDto: ActualizarRutinaDto,
+    @Req() req: RequestConUsuario,
+  ) {
+    if (req.user.rol !== 'Entrenador') {
+      throw new ForbiddenException(
+        'Solo los entrenadores pueden actualizar rutinas.',
+      );
+    }
+    return this.actualizarRutinaService.ejecutar(
+      id,
+      actualizarRutinaDto,
+      req.user.userId,
+    );
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  async eliminarRutina(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Req() req: RequestConUsuario,
+  ) {
+    if (req.user.rol !== 'Entrenador') {
+      throw new ForbiddenException(
+        'Solo los entrenadores pueden eliminar rutinas.',
+      );
+    }
+    return this.eliminarRutinaService.ejecutar(id, req.user.userId);
   }
 }

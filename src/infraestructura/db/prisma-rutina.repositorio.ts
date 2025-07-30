@@ -110,6 +110,88 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
     return count > 0;
   }
 
+  public async eliminar(id: string): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      // Primero eliminar las relaciones de ejercicios
+      await tx.routineExercise.deleteMany({
+        where: { routineId: id },
+      });
+
+      // Luego eliminar las asignaciones relacionadas
+      await tx.athleteAssignment.deleteMany({
+        where: { routineId: id },
+      });
+
+      // Finalmente eliminar la rutina
+      await tx.routine.delete({
+        where: { id },
+      });
+    });
+  }
+
+  public async actualizar(id: string, datosActualizacion: {
+    nombre?: string;
+    nivel?: string;
+    descripcion?: string;
+    ejercicios?: {
+      exerciseId: string;
+      setsReps: string;
+      duracionEstimadaSegundos?: number;
+    }[];
+  }): Promise<Rutina> {
+    const rutinaActualizada = await this.prisma.$transaction(async (tx) => {
+      // Actualizar datos básicos de la rutina
+      const rutina = await tx.routine.update({
+        where: { id },
+        data: {
+          name: datosActualizacion.nombre,
+          targetLevel: datosActualizacion.nivel,
+          description: datosActualizacion.descripcion,
+        },
+      });
+
+      // Si se proporcionan ejercicios, actualizar la lista completa
+      if (datosActualizacion.ejercicios) {
+        // Eliminar ejercicios existentes
+        await tx.routineExercise.deleteMany({
+          where: { routineId: id },
+        });
+
+        // Crear nuevos ejercicios
+        await tx.routineExercise.createMany({
+          data: datosActualizacion.ejercicios.map((ejercicio, index) => ({
+            routineId: id,
+            exerciseId: ejercicio.exerciseId,
+            orderIndex: index + 1,
+            setsReps: ejercicio.setsReps,
+            duracionEstimadaSegundos: ejercicio.duracionEstimadaSegundos,
+          })),
+        });
+      }
+
+      // Obtener la rutina actualizada con sus relaciones
+      return await tx.routine.findUnique({
+        where: { id },
+        include: {
+          exercises: {
+            orderBy: {
+              orderIndex: 'asc',
+            },
+            include: {
+              exercise: true,
+            },
+          },
+        },
+      });
+    });
+
+    if (!rutinaActualizada) {
+      throw new Error('Rutina no encontrada después de la actualización');
+    }
+
+    return this.mapearADominio(rutinaActualizada);
+  }
+
   private mapearADominio(
     rutinaDb: Routine & {
       exercises: (RoutineExercise & { exercise: PrismaExercise })[];
