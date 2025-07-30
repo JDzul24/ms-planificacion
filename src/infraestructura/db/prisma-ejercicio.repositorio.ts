@@ -95,6 +95,13 @@ export class PrismaEjercicioRepositorio implements IEjercicioRepositorio {
 
         return this.mapearADominio(ejercicioDb);
       }
+      
+      // Si falla por foreign key de sportId (deporte no existe)
+      if (error.code === 'P2003' && error.meta?.constraint === 'exercises_sportId_fkey') {
+        console.error('❌ [PrismaEjercicioRepositorio] Deporte no existe en BD:', sportId);
+        throw new Error(`El deporte con ID ${sportId} no existe en la base de datos. Debe crearse primero.`);
+      }
+      
       // Re-lanzar cualquier otro error
       throw error;
     }

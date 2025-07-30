@@ -25,6 +25,11 @@ export class CrearRutinaService {
         throw new Error('sportId debe ser un número válido');
       }
 
+      console.log('🏆 [CrearRutinaService] Verificando que existe el deporte ID:', sportIdNumber);
+
+      // Verificar que el deporte existe, si no existe crearlo
+      await this.verificarOCrearDeporte(sportIdNumber);
+
       console.log('🏃 [CrearRutinaService] Procesando ejercicios:', dto.ejercicios.length);
 
       // Procesar ejercicios: asegurar que existan en la base de datos
@@ -92,5 +97,46 @@ export class CrearRutinaService {
     }
   }
 
+  /**
+   * Verifica que el deporte existe en la base de datos, si no existe lo crea.
+   */
+  private async verificarOCrearDeporte(sportId: number): Promise<void> {
+    try {
+      console.log('🔍 [CrearRutinaService] Buscando deporte ID:', sportId);
+      
+      // Buscar el deporte en la base de datos usando Prisma directamente
+      const deporteExistente = await (this.ejercicioRepositorio as any).prisma.sport.findUnique({
+        where: { id: sportId }
+      });
+
+      if (deporteExistente) {
+        console.log('✅ [CrearRutinaService] Deporte encontrado:', deporteExistente.name);
+        return;
+      }
+
+      console.log('⚠️ [CrearRutinaService] Deporte no existe, creando deporte por defecto con ID:', sportId);
+
+      // Crear deporte por defecto si no existe
+      const nuevoDeporte = await (this.ejercicioRepositorio as any).prisma.sport.create({
+        data: {
+          id: sportId,
+          name: `Deporte ${sportId}`,
+          description: `Deporte creado automáticamente con ID ${sportId}`,
+        }
+      });
+
+      console.log('✅ [CrearRutinaService] Deporte creado exitosamente:', nuevoDeporte.name);
+    } catch (error) {
+      console.error('❌ [CrearRutinaService] Error verificando/creando deporte:', error);
+      
+      // Si es error de duplicado (deporte ya existe), continuar
+      if (error.code === 'P2002') {
+        console.log('✅ [CrearRutinaService] Deporte ya existe (creado por otro proceso)');
+        return;
+      }
+      
+      throw new Error(`Error verificando deporte ID ${sportId}: ${error.message}`);
+    }
+  }
 
 }
