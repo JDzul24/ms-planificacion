@@ -1,3 +1,5 @@
+import { IsIn, IsNotEmpty, IsString } from 'class-validator';
+
 /**
  * DTO para representar los detalles de un único ejercicio
  * dentro de la respuesta de una rutina detallada.
@@ -32,5 +34,8 @@ export class EjercicioDetalleDto {
   /**
    * La categoría del ejercicio para organización en el frontend.
    */
+  @IsString()
+  @IsNotEmpty()
+  @IsIn(['calentamiento', 'resistencia', 'tecnica'])
   categoria: 'calentamiento' | 'resistencia' | 'tecnica';
 }

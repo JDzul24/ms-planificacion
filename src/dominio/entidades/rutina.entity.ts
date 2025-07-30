@@ -7,6 +7,7 @@ export interface EjercicioEnRutina {
   descripcion?: string | null; // Opcional para compatibilidad con otros servicios
   setsReps: string;
   duracionEstimadaSegundos: number;
+  categoria: 'calentamiento' | 'resistencia' | 'tecnica'; // Campo de categoría añadido
 }
 
 export class Rutina {

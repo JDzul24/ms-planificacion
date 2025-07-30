@@ -30,43 +30,17 @@ export class ConsultarDetallesRutinaService {
     console.log('📋 [ConsultarDetallesRutinaService] Ejercicios:', rutina.ejercicios.length);
 
     // Mapeamos la entidad de dominio y sus ejercicios a un DTO de respuesta detallado.
-    // CORRECCIÓN: Ahora usamos la categoría real del ejercicio si existe, o la determinamos como fallback
+    // La categoría ahora viene directamente de la entidad de dominio.
     const ejerciciosDto: EjercicioDetalleDto[] = rutina.ejercicios.map(
-      (ejercicio, index) => {
-        // Intentar obtener la categoría directamente
-        let categoria = (ejercicio as any).categoria;
-        
-        // Si no existe, obtenerla del campo específico
-        const ejercicioDb = (rutina as any).ejerciciosDb?.[index];
-        if (!categoria && ejercicioDb?.exercise?.categoria) {
-          categoria = ejercicioDb.exercise.categoria;
-        }
-
-        console.log(`📊 [ConsultarDetallesRutinaService] Ejercicio #${index + 1}: ${ejercicio.nombre}`);
-        console.log(`  - Categoría almacenada: ${categoria || 'no encontrada'}`);
-        console.log(`  - Ejercicio DB información: ${JSON.stringify(ejercicioDb?.exercise || {})}`);
-        
-        if (categoria === 'resistencia') {
-          console.log(`  🔍 [ConsultarDetallesRutinaService] DETECTADA categoría 'resistencia'`);
-        }
-        
-        // Solo como fallback usar la determinación por nombre
-        if (!categoria || !['calentamiento', 'resistencia', 'tecnica'].includes(categoria)) {
-          const categoriaCalculada = this.determinarCategoria(ejercicio.nombre);
-          console.log(`  - Categoría calculada: ${categoriaCalculada} (fallback por nombre)`);
-          categoria = categoriaCalculada;
-        } else {
-          console.log(`  - Usando categoría almacenada: ${categoria}`);
-          console.log(`  - ¿Es válida? ${['calentamiento', 'resistencia', 'tecnica'].includes(categoria) ? 'SÍ' : 'NO'}`);
-        }
-
+      (ejercicio) => {
+        console.log(`[ConsultarDetallesRutinaService] Mapeando ejercicio: ${ejercicio.nombre}, Categoría: ${ejercicio.categoria}`);
         return {
           id: ejercicio.id,
           nombre: ejercicio.nombre,
           descripcion: ejercicio.descripcion || '',
           setsReps: ejercicio.setsReps,
           duracionEstimadaSegundos: ejercicio.duracionEstimadaSegundos,
-          categoria: categoria,
+          categoria: ejercicio.categoria,
         };
       }
     );
@@ -80,54 +54,5 @@ export class ConsultarDetallesRutinaService {
     };
 
     return rutinaDetallesDto;
-  }
-
-  /**
-   * Determina la categoría de un ejercicio basándose en su nombre.
-   * Esta es una implementación temporal hasta que se agregue el campo categoria a la entidad.
-   */
-  private determinarCategoria(nombreEjercicio: string): 'calentamiento' | 'resistencia' | 'tecnica' {
-    const nombre = nombreEjercicio.toLowerCase();
-
-    // Palabras clave para calentamiento
-    const calentamientoKeywords = [
-      'calentamiento', 'estiramiento', 'movilidad', 'articular', 
-      'rotacion', 'rotación', 'flexibilidad', 'preparacion', 'preparación',
-      'hombro', 'cuello', 'muñeca', 'tobillo', 'cadera'
-    ];
-
-    // Palabras clave para resistencia
-    const resistenciaKeywords = [
-      'burpees', 'salto', 'correr', 'trote', 'cardio', 'resistencia',
-      'mountain', 'climber', 'jumping', 'jack', 'sentadilla', 'squat',
-      'plancha', 'plank', 'abdomen', 'flexion', 'flexión', 'lagartija',
-      'push', 'up', 'escalador', 'sprint'
-    ];
-
-    // Palabras clave para técnica
-    const tecnicaKeywords = [
-      'jab', 'cross', 'hook', 'uppercut', 'directo', 'gancho',
-      'sombra', 'shadow', 'boxing', 'boxeo', 'golpe', 'combo',
-      'combinacion', 'combinación', 'tecnica', 'técnica', 'defensa',
-      'esquiva', 'bloqueo', 'guardia', 'stance', 'postura'
-    ];
-
-    // Verificar calentamiento
-    if (calentamientoKeywords.some(keyword => nombre.includes(keyword))) {
-      return 'calentamiento';
-    }
-
-    // Verificar técnica
-    if (tecnicaKeywords.some(keyword => nombre.includes(keyword))) {
-      return 'tecnica';
-    }
-
-    // Verificar resistencia
-    if (resistenciaKeywords.some(keyword => nombre.includes(keyword))) {
-      return 'resistencia';
-    }
-
-    // Por defecto, asignar a técnica si no se puede determinar
-    return 'tecnica';
   }
 }

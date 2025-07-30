@@ -325,6 +325,7 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
       descripcion: e.exercise.description,
       setsReps: e.setsReps || '',
       duracionEstimadaSegundos: e.duracionEstimadaSegundos ?? 0,
+      categoria: e.exercise.categoria as 'calentamiento' | 'resistencia' | 'tecnica',
     }));
 
     return Rutina.desdePersistencia({
