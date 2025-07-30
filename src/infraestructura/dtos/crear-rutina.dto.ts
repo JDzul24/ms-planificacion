@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import {
   IsArray,
   IsNotEmpty,
@@ -45,9 +45,13 @@ export class CrearRutinaDto {
   @IsIn(['Principiante', 'Intermedio', 'Avanzado'])
   nivel: string;
 
+  @Transform(({ value }) => {
+    // Convertir tanto string como number a string
+    return typeof value === 'number' ? value.toString() : value;
+  })
   @IsString()
   @IsNotEmpty()
-  sportId: string; // Cambiado de number a string para coincidir con frontend
+  sportId: string; // Acepta tanto number como string del frontend
 
   @IsString()
   @IsOptional()
