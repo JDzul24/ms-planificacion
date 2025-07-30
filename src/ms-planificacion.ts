@@ -10,6 +10,7 @@ import { EjerciciosController } from './infraestructura/controladores/ejercicios
 import { AsignacionesController } from './infraestructura/controladores/asignaciones.controller';
 import { DeportesController } from './infraestructura/controladores/deportes.controller';
 import { MetasController } from './infraestructura/controladores/metas.controller';
+import { CoachController } from './infraestructura/controladores/coach.controller';
 
 // --- Servicios de Aplicación ---
 import { CrearRutinaService } from './aplicacion/servicios/crear-rutina.service';
@@ -30,6 +31,7 @@ import { CrearMetaService } from './aplicacion/servicios/crear-meta.service';
 import { ConsultarMetasService } from './aplicacion/servicios/consultar-metas.service';
 import { ActualizarMetaService } from './aplicacion/servicios/actualizar-meta.service';
 import { EliminarMetaService } from './aplicacion/servicios/eliminar-meta.service';
+import { ConsultarEstudiantesService } from './aplicacion/servicios/consultar-estudiantes.service';
 
 // --- Guardias y Estrategias ---
 import { JwtAuthGuard } from './infraestructura/guardias/jwt-auth.guard';
@@ -65,6 +67,7 @@ import { PrismaMetaRepositorio } from './infraestructura/db/prisma-meta.reposito
     AsignacionesController,
     DeportesController,
     MetasController,
+    CoachController,
   ],
   providers: [
     // Servicios de Aplicación
@@ -86,6 +89,7 @@ import { PrismaMetaRepositorio } from './infraestructura/db/prisma-meta.reposito
     ConsultarMetasService,
     ActualizarMetaService,
     EliminarMetaService,
+    ConsultarEstudiantesService,
 
     // Guardias y Estrategias
     JwtAuthGuard,

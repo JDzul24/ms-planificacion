@@ -1,0 +1,118 @@
+# 🚀 SOLUCIÓN: Sistema de Asignación de Rutinas
+
+## ✅ PROBLEMAS RESUELTOS
+
+### 1. Endpoint `/coach/gym-students` implementado
+Se ha creado un nuevo endpoint para obtener la lista de estudiantes del gimnasio al que pertenece el coach autenticado:
+
+```
+GET /v1/coach/gym-students
+```
+
+- **Headers requeridos**: `Authorization: Bearer {jwt_token}`
+- **Parámetros opcionales**: `nivel` (para filtrar por nivel de entrenamiento)
+- **Formato de respuesta**:
+```json
+[
+  {
+    "id": "uuid-estudiante-1",
+    "nombre": "Juan Pérez",
+    "nivel": "principiante",
+    "email": "juan@example.com"
+  },
+  {
+    "id": "uuid-estudiante-2", 
+    "nombre": "María García",
+    "nivel": "avanzado",
+    "email": "maria@example.com"
+  }
+]
+```
+
+### 2. Mejoras en el endpoint de asignación (`POST /v1/assignments`)
+Se han implementado mejoras significativas en la validación y el manejo de errores:
+
+- **Validación de UUIDs**: Ahora verifica que los IDs de atletas sean UUIDs válidos
+- **Mensajes de error detallados**: Proporciona feedback específico cuando hay problemas
+- **Logging extensivo**: Facilita la depuración de problemas
+- **Validación de existencia**: Verifica que los atletas y rutinas existan antes de crear asignaciones
+
+## 📝 DETALLES DE IMPLEMENTACIÓN
+
+### Nuevos componentes creados:
+
+1. **Controlador**: `CoachController` 
+   - Maneja el endpoint `/coach/gym-students`
+   - Aplica filtros por nivel si se solicita
+   - Verifica permisos (solo coaches pueden acceder)
+
+2. **Servicio**: `ConsultarEstudiantesService`
+   - Comunica con el microservicio de identidad
+   - Obtiene el gimnasio del coach
+   - Obtiene los miembros del gimnasio
+   - Filtra solo los atletas
+
+3. **DTO**: `EstudianteGimnasioDto`
+   - Define estructura para la respuesta
+   - Incluye validaciones de clase-validator
+
+### Mejoras en componentes existentes:
+
+1. **Servicio**: `CrearAsignacionService`
+   - Añadido logging extensivo
+   - Mejorada la validación de datos
+   - Implementado manejo de errores detallado
+
+2. **Repositorio**: `PrismaAsignacionRepositorio`
+   - Añadida validación de UUIDs
+   - Mejorado manejo de errores de base de datos
+   - Implementados mensajes de error más claros
+
+## 🧪 CÓMO VERIFICAR LA SOLUCIÓN
+
+### 1. Para probar `/coach/gym-students`:
+
+```bash
+curl -X GET "https://api.capbox.site/planning/v1/coach/gym-students" \
+  -H "Authorization: Bearer {jwt_token}"
+```
+
+Deberías recibir una lista de estudiantes pertenecientes al gimnasio del coach autenticado.
+
+### 2. Para probar asignaciones con los IDs correctos:
+
+```bash
+curl -X POST "https://api.capbox.site/planning/v1/assignments" \
+  -H "Authorization: Bearer {jwt_token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rutinaId": "fde1ccbe-6471-41fe-a69c-e32034384304",
+    "metaId": null,
+    "atletaIds": ["id-estudiante-1-real", "id-estudiante-2-real"]
+  }'
+```
+
+## 📱 INSTRUCCIONES PARA EL FRONTEND
+
+1. **Actualiza las URLs de los endpoints**:
+   - Usa `/planning/v1/coach/gym-students` para obtener la lista de estudiantes
+   - Continúa usando `/planning/v1/assignments` para las asignaciones
+
+2. **Flujo correcto para asignaciones**:
+   1. Obtén la lista de estudiantes del gimnasio con `/coach/gym-students`
+   2. Permite al usuario seleccionar estudiantes de esa lista (usando los IDs reales)
+   3. Envía los IDs seleccionados junto con la rutinaId al endpoint de asignación
+
+3. **Manejo de errores**:
+   - Si hay errores 400, muestra el mensaje de error al usuario
+   - El backend ahora proporciona mensajes de error más claros y específicos
+
+## 🔍 NOTAS ADICIONALES
+
+- El endpoint `/coach/gym-students` requiere que el usuario tenga rol de "Entrenador"
+- Los IDs de atletas deben ser UUIDs válidos
+- Si necesitas filtrar estudiantes por nivel, usa el parámetro de consulta: `/coach/gym-students?nivel=principiante`
+
+---
+
+Si encuentras algún problema adicional, por favor proporciona los logs detallados del error para una rápida resolución.

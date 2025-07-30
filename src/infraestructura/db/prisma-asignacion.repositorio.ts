@@ -10,20 +10,67 @@ export class PrismaAsignacionRepositorio implements IAsignacionRepositorio {
   constructor(private readonly prisma: PrismaService) {}
 
   public async guardarMultiples(asignaciones: Asignacion[]): Promise<void> {
-    const datosParaCrear = asignaciones.map((asignacion) => ({
-      id: asignacion.id,
-      athleteId: asignacion.atletaId,
-      assignerId: asignacion.assignerId,
-      routineId: asignacion.rutinaId,
-      goalId: asignacion.metaId,
-      status: asignacion.status,
-      assignedAt: asignacion.assignedAt,
-    }));
+    try {
+      console.log(`💾 [PrismaAsignacionRepositorio] Guardando ${asignaciones.length} asignaciones`);
 
-    await this.prisma.athleteAssignment.createMany({
-      data: datosParaCrear,
-      skipDuplicates: true,
-    });
+      const datosParaCrear = asignaciones.map((asignacion) => {
+        // Verificar si los IDs son válidos (UUIDs)
+        if (!this.esUUID(asignacion.atletaId)) {
+          console.error(`❌ [PrismaAsignacionRepositorio] ID de atleta inválido: ${asignacion.atletaId}`);
+          throw new Error(`ID de atleta inválido: ${asignacion.atletaId}. Debe ser un UUID válido.`);
+        }
+
+        console.log(`📝 [PrismaAsignacionRepositorio] Preparando asignación: 
+          ID: ${asignacion.id}
+          AtletaID: ${asignacion.atletaId}
+          AssignerID: ${asignacion.assignerId}
+          RutinaID: ${asignacion.rutinaId || 'N/A'}`
+        );
+        
+        return {
+          id: asignacion.id,
+          athleteId: asignacion.atletaId,
+          assignerId: asignacion.assignerId,
+          routineId: asignacion.rutinaId,
+          goalId: asignacion.metaId,
+          status: asignacion.status,
+          assignedAt: asignacion.assignedAt,
+        };
+      });
+
+      // Intentar crear las asignaciones en la base de datos
+      const resultado = await this.prisma.athleteAssignment.createMany({
+        data: datosParaCrear,
+        skipDuplicates: true,
+      });
+
+      console.log(`✅ [PrismaAsignacionRepositorio] Se guardaron ${resultado.count} asignaciones de ${asignaciones.length}`);
+    } catch (error) {
+      console.error('❌ [PrismaAsignacionRepositorio] Error al guardar asignaciones:', error.message);
+      
+      // Verificar errores específicos de Prisma
+      if (error.code === 'P2003') {
+        // Error de foreign key constraint
+        const campo = error.meta?.field_name || '';
+        if (campo.includes('athleteId')) {
+          throw new Error('Uno o más IDs de atletas no existen en la base de datos.');
+        } else if (campo.includes('routineId')) {
+          throw new Error('La rutina especificada no existe en la base de datos.');
+        }
+      }
+      
+      throw error;
+    }
+  }
+  
+  /**
+   * Verifica si una cadena es un UUID válido.
+   * @param id Cadena a verificar
+   * @returns true si es un UUID válido, false en caso contrario
+   */
+  private esUUID(id: string): boolean {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(id);
   }
 
   public async encontrarPorAtletaId(atletaId: string): Promise<Asignacion[]> {
