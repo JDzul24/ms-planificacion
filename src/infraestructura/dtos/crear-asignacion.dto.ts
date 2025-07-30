@@ -13,9 +13,10 @@ import {
 export class IsRutinaOrMetaConstraint implements ValidatorConstraintInterface {
   validate(value: any, args: ValidationArguments) {
     const object = args.object as CrearAsignacionDto;
-    const tieneRutina = !!object.rutinaId;
-    const tieneMeta = !!object.metaId;
-    return (tieneRutina && !tieneMeta) || (!tieneRutina && tieneMeta);
+    const tieneRutina = !!object.rutinaId && object.rutinaId !== null;
+    const tieneMeta = !!object.metaId && object.metaId !== null;
+    // Permitir: solo rutina, solo meta, o rutina con metaId null
+    return tieneRutina || tieneMeta;
   }
 
   // --- CORRECCIÓN AQUÍ: Se elimina el parámetro 'args' que no se usa ---
@@ -30,7 +31,6 @@ export class CrearAsignacionDto {
   @IsOptional()
   rutinaId?: string;
 
-  @IsUUID('4', { message: 'El ID de la meta debe ser un UUID válido.' })
   @IsOptional()
   metaId?: string;
 

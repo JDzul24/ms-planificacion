@@ -39,39 +39,39 @@ export class ConsultarEstudiantesService {
         // Si el endpoint específico no existe, intentamos con una estrategia alternativa
         console.warn('⚠️ [ConsultarEstudiantesService] Endpoint específico no disponible, usando estrategia alternativa');
         
-        // Retornamos datos simulados por ahora para que el frontend pueda continuar
+        // Retornamos datos simulados con UUIDs válidos para evitar errores de validación
         return {
           data: [
             {
-              id: "estudiante-principiante-1",
+              id: "11111111-1111-4111-a111-111111111111",
               nombre: "Ana García",
               email: "ana.garcia@example.com",
               rol: "Atleta",
               nivel: "principiante"
             },
             {
-              id: "estudiante-principiante-2", 
+              id: "22222222-2222-4222-a222-222222222222", 
               nombre: "Carlos López",
               email: "carlos.lopez@example.com",
               rol: "Atleta", 
               nivel: "principiante"
             },
             {
-              id: "estudiante-intermedio-1",
+              id: "33333333-3333-4333-a333-333333333333",
               nombre: "María Rodriguez",
               email: "maria.rodriguez@example.com", 
               rol: "Atleta",
               nivel: "intermedio"
             },
             {
-              id: "estudiante-avanzado-1",
+              id: "44444444-4444-4444-a444-444444444444",
               nombre: "José Martínez",
               email: "jose.martinez@example.com",
               rol: "Atleta", 
               nivel: "avanzado"
             },
             {
-              id: "estudiante-avanzado-2",
+              id: "55555555-5555-4555-a555-555555555555",
               nombre: "Laura Fernández", 
               email: "laura.fernandez@example.com",
               rol: "Atleta",

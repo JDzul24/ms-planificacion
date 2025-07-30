@@ -66,13 +66,23 @@ export class AsignacionesController {
   ) {
     const { userId: assignerId, rol } = req.user;
 
+    console.log('🎯 [AsignacionesController] Payload recibido:', JSON.stringify(crearAsignacionDto));
+    console.log('🎯 [AsignacionesController] Usuario:', { assignerId, rol });
+
     if (rol !== 'Entrenador') {
       throw new ForbiddenException(
         'No tienes los permisos necesarios para asignar planes.',
       );
     }
 
-    return this.crearAsignacionService.ejecutar(crearAsignacionDto, assignerId);
+    try {
+      const resultado = await this.crearAsignacionService.ejecutar(crearAsignacionDto, assignerId);
+      console.log('✅ [AsignacionesController] Asignación exitosa:', resultado);
+      return resultado;
+    } catch (error) {
+      console.error('❌ [AsignacionesController] Error en asignación:', error.message);
+      throw error;
+    }
   }
 
   /**
