@@ -10,14 +10,27 @@ export class CrearRutinaService {
     private readonly rutinaRepositorio: IRutinaRepositorio,
   ) {}
 
-  async ejecutar(dto: CrearRutinaDto): Promise<{ id: string }> {
+  async ejecutar(dto: CrearRutinaDto & { coachId: string }): Promise<{ id: string }> {
+    // Convertir sportId de string a number para la entidad de dominio
+    const sportIdNumber = parseInt(dto.sportId, 10);
+    if (isNaN(sportIdNumber)) {
+      throw new Error('sportId debe ser un número válido');
+    }
+
+    // Transformar ejercicios para que coincidan con la estructura esperada por la entidad
+    const ejerciciosTransformados = dto.ejercicios.map((ejercicio) => ({
+      exerciseId: ejercicio.id, // Mapear id a exerciseId
+      setsReps: ejercicio.setsReps,
+      duracionEstimadaSegundos: ejercicio.duracionEstimadaSegundos,
+    }));
+
     // La entidad de dominio se encarga de la validación y creación inicial
     const nuevaRutina = Rutina.crear({
       nombre: dto.nombre,
       nivel: dto.nivel,
       coachId: dto.coachId,
-      sportId: dto.sportId,
-      ejercicios: dto.ejercicios,
+      sportId: sportIdNumber,
+      ejercicios: ejerciciosTransformados,
     });
 
     // Delegamos la persistencia al repositorio

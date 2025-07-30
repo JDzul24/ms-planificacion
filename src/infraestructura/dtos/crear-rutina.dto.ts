@@ -3,18 +3,36 @@ import {
   IsArray,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
-  IsUUID,
+  IsIn,
   ValidateNested,
 } from 'class-validator';
 
 class EjercicioEnRutinaDto {
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
-  exerciseId: string;
+  id: string;
 
   @IsString()
+  @IsNotEmpty()
+  nombre: string;
+
+  @IsString()
+  @IsOptional()
+  descripcion?: string;
+
+  @IsString()
+  @IsNotEmpty()
   setsReps: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  duracionEstimadaSegundos: number;
+
+  @IsString()
+  @IsIn(['calentamiento', 'resistencia', 'tecnica'])
+  categoria: 'calentamiento' | 'resistencia' | 'tecnica';
 }
 
 export class CrearRutinaDto {
@@ -24,15 +42,18 @@ export class CrearRutinaDto {
 
   @IsString()
   @IsNotEmpty()
-  nivel: string; // e.g., 'Principiante', 'Intermedio'
+  @IsIn(['Principiante', 'Intermedio', 'Avanzado'])
+  nivel: string;
 
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
-  coachId: string; // En un sistema real, se obtendría del token de autenticación
+  sportId: string; // Cambiado de number a string para coincidir con frontend
 
-  @IsNumber()
-  @IsNotEmpty()
-  sportId: number;
+  @IsString()
+  @IsOptional()
+  descripcion?: string; // Agregar descripcion
+
+  // coachId se agregará automáticamente desde el token JWT en el controller
 
   @IsArray()
   @ValidateNested({ each: true })
