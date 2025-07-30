@@ -1,5 +1,13 @@
 import { randomUUID } from 'crypto';
-import { Ejercicio } from './ejercicio.entity';
+
+// Tipo para los ejercicios en la rutina (datos necesarios)
+export interface EjercicioEnRutina {
+  id: string;
+  nombre?: string; // Opcional para compatibilidad con otros servicios
+  descripcion?: string | null; // Opcional para compatibilidad con otros servicios
+  setsReps: string;
+  duracionEstimadaSegundos: number;
+}
 
 export class Rutina {
   readonly id: string;
@@ -8,7 +16,7 @@ export class Rutina {
   readonly coachId: string;
   readonly sportId: number;
   readonly descripcion?: string;
-  public ejercicios: Ejercicio[];
+  public ejercicios: EjercicioEnRutina[];
 
   private constructor(props: {
     id: string;
@@ -17,7 +25,7 @@ export class Rutina {
     coachId: string;
     sportId: number;
     descripcion?: string;
-    ejercicios: Ejercicio[];
+    ejercicios: EjercicioEnRutina[];
   }) {
     if (!props.nombre) throw new Error('El nombre de la rutina es requerido.');
     if (props.ejercicios.length === 0)
@@ -44,16 +52,13 @@ export class Rutina {
       duracionEstimadaSegundos?: number;
     }[];
   }): Rutina {
-    // --- CORRECCIÓN AQUÍ: El mapeo ahora es completo y correcto ---
-    const ejerciciosEntidad = props.ejercicios.map((e) =>
-      Ejercicio.desdePersistencia({
-        id: e.exerciseId,
-        nombre: '', // El nombre se obtendrá de la BD, aquí no es necesario
-        setsReps: e.setsReps,
-        descripcion: null,
-        duracionEstimadaSegundos: e.duracionEstimadaSegundos ?? 0,
-      }),
-    );
+    // No necesitamos crear entidades Ejercicio aquí, solo almacenar los datos
+    // Los ejercicios ya están guardados en la BD con sus nombres correctos
+    const ejerciciosData = props.ejercicios.map((e) => ({
+      id: e.exerciseId,
+      setsReps: e.setsReps,
+      duracionEstimadaSegundos: e.duracionEstimadaSegundos ?? 0,
+    }));
 
     return new Rutina({
       id: randomUUID(),
@@ -62,7 +67,7 @@ export class Rutina {
       coachId: props.coachId,
       sportId: props.sportId,
       descripcion: props.descripcion,
-      ejercicios: ejerciciosEntidad,
+      ejercicios: ejerciciosData,
     });
   }
 
@@ -73,7 +78,7 @@ export class Rutina {
     coachId: string;
     sportId: number;
     descripcion?: string;
-    ejercicios: Ejercicio[];
+    ejercicios: EjercicioEnRutina[];
   }): Rutina {
     return new Rutina(props);
   }

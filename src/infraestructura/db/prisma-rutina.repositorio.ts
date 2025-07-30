@@ -7,8 +7,7 @@ import {
 } from '@prisma/client';
 
 import { IRutinaRepositorio } from '../../dominio/repositorios/rutina.repositorio';
-import { Rutina } from '../../dominio/entidades/rutina.entity';
-import { Ejercicio } from '../../dominio/entidades/ejercicio.entity';
+import { Rutina, EjercicioEnRutina } from '../../dominio/entidades/rutina.entity';
 
 @Injectable()
 export class PrismaRutinaRepositorio implements IRutinaRepositorio {
@@ -288,15 +287,13 @@ export class PrismaRutinaRepositorio implements IRutinaRepositorio {
       exercises: (RoutineExercise & { exercise: PrismaExercise })[];
     },
   ): Rutina {
-    const ejerciciosMapeados = rutinaDb.exercises.map((e) =>
-      Ejercicio.desdePersistencia({
-        id: e.exercise.id,
-        nombre: e.exercise.name,
-        setsReps: e.setsReps,
-        descripcion: e.exercise.description,
-        duracionEstimadaSegundos: e.duracionEstimadaSegundos ?? 0,
-      }),
-    );
+    const ejerciciosMapeados: EjercicioEnRutina[] = rutinaDb.exercises.map((e) => ({
+      id: e.exercise.id,
+      nombre: e.exercise.name,
+      descripcion: e.exercise.description,
+      setsReps: e.setsReps || '',
+      duracionEstimadaSegundos: e.duracionEstimadaSegundos ?? 0,
+    }));
 
     return Rutina.desdePersistencia({
       id: rutinaDb.id,

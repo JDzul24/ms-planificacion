@@ -98,11 +98,12 @@ export class CrearRutinaService {
   }
 
   /**
-   * Verifica que el deporte existe en la base de datos, si no existe lo crea.
+   * Verifica que el deporte BOXEO existe en la base de datos, si no existe lo crea.
+   * La aplicación está diseñada específicamente para deportes de contacto, empezando con BOXEO.
    */
   private async verificarOCrearDeporte(sportId: number): Promise<void> {
     try {
-      console.log('🔍 [CrearRutinaService] Buscando deporte ID:', sportId);
+      console.log('🥊 [CrearRutinaService] Verificando deporte BOXEO (ID:', sportId, ')');
       
       // Buscar el deporte en la base de datos usando Prisma directamente
       const deporteExistente = await (this.ejercicioRepositorio as any).prisma.sport.findUnique({
@@ -114,28 +115,28 @@ export class CrearRutinaService {
         return;
       }
 
-      console.log('⚠️ [CrearRutinaService] Deporte no existe, creando deporte por defecto con ID:', sportId);
+      console.log('⚠️ [CrearRutinaService] Deporte BOXEO no existe, creando automáticamente...');
 
-      // Crear deporte por defecto si no existe
+      // Crear BOXEO como deporte por defecto (la app es específica para deportes de contacto)
       const nuevoDeporte = await (this.ejercicioRepositorio as any).prisma.sport.create({
         data: {
           id: sportId,
-          name: `Deporte ${sportId}`,
-          description: `Deporte creado automáticamente con ID ${sportId}`,
+          name: 'BOXEO',
+          description: 'Deporte de contacto - Boxeo. Entrenamiento de combate, técnica, resistencia y acondicionamiento físico.',
         }
       });
 
-      console.log('✅ [CrearRutinaService] Deporte creado exitosamente:', nuevoDeporte.name);
+      console.log('✅ [CrearRutinaService] Deporte BOXEO creado exitosamente:', nuevoDeporte.name);
     } catch (error) {
-      console.error('❌ [CrearRutinaService] Error verificando/creando deporte:', error);
+      console.error('❌ [CrearRutinaService] Error verificando/creando deporte BOXEO:', error);
       
       // Si es error de duplicado (deporte ya existe), continuar
       if (error.code === 'P2002') {
-        console.log('✅ [CrearRutinaService] Deporte ya existe (creado por otro proceso)');
+        console.log('✅ [CrearRutinaService] Deporte BOXEO ya existe (creado por otro proceso)');
         return;
       }
       
-      throw new Error(`Error verificando deporte ID ${sportId}: ${error.message}`);
+      throw new Error(`Error verificando deporte BOXEO ID ${sportId}: ${error.message}`);
     }
   }
 
